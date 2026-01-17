@@ -8,10 +8,15 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
     globals: true,
+    coverage: {
+      reporter: ["text", "json", "html"],
+      exclude: ["node_modules/", "tests/", "vitest.setup.ts"],
+    },
   },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
+
 });
