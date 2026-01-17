@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PetCard } from "../../components/pets/pet-card";
 import { useObservable } from "../../hooks/use-observable.hook";
@@ -11,6 +11,7 @@ const SEARCH_DEBOUNCE = 300;
 
 export function PetsListPage() {
   const navigate = useNavigate();
+  const hasLoadedRef = useRef(false);
 
   const pets = useObservable<PetEntity[]>(petFacade.pets$, []);
   const loading = useObservable<boolean>(petFacade.loading$, false);
@@ -33,7 +34,10 @@ export function PetsListPage() {
   }, [searchTerm]);
 
   useEffect(() => {
-    petFacade.load(1, PAGE_SIZE, debouncedQuery);
+    if (!hasLoadedRef.current || debouncedQuery !== "") {
+      hasLoadedRef.current = true;
+      petFacade.load(1, PAGE_SIZE, debouncedQuery);
+    }
   }, [debouncedQuery]);
 
   const handlePrevPage = () => {
