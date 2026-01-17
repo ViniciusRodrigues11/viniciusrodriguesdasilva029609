@@ -4,6 +4,7 @@ import type { IAuthRepository } from '../../domain/repositories/auth.repository'
 import type { CredentialsEntity } from '../../domain/entities/auth.entity';
 import type { LoginState } from '../use-cases/login.use-case';
 import { LoginUseCase } from '../use-cases/login.use-case';
+import { RefreshTokenUseCase, type RefreshTokenState } from '../use-cases/refresh-token.use-case';
 import { TokenStorage } from '../../infrastructure/storage/token.storage';
 
 export interface AuthState {
@@ -21,6 +22,7 @@ export class AuthFacade {
 
   constructor(
     readonly loginUseCase: LoginUseCase,
+    readonly refreshTokenUseCase: RefreshTokenUseCase,
     readonly authRepository: IAuthRepository,
     readonly tokenStorage: TokenStorage
   ) {
@@ -59,6 +61,31 @@ export class AuthFacade {
       isAuthenticated: false,
       isLoading: false,
       error: null,
+    });
+  }
+
+  refreshToken(): void {
+    const refreshToken = this.tokenStorage.getRefreshToken();
+
+    if (!refreshToken) {
+      this.updateAuthState({
+        isAuthenticated: false,
+        error: 'Token de refresh não encontrado',
+      });
+      return;
+    }
+
+    this.refreshTokenUseCase.execute(refreshToken).subscribe((refreshState: RefreshTokenState) => {
+      this.updateAuthState({
+        isLoading: refreshState.isLoading,
+        error: refreshState.error,
+        isAuthenticated: !refreshState.error && !refreshState.isLoading,
+      });
+
+      // Se houve erro no refresh, fazer logout
+      if (refreshState.error) {
+        this.logout();
+      }
     });
   }
 

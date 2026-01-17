@@ -20,7 +20,8 @@ export class AuthRepositoryImpl implements IAuthRepository {
     this.tokenStorage.saveTokens(
       auth.access_token,
       auth.refresh_token,
-      auth.expires_in
+      auth.expires_in,
+      auth.refresh_expires_in
     );
 
     this.authApi.setAccessToken(auth.access_token);
@@ -35,7 +36,8 @@ export class AuthRepositoryImpl implements IAuthRepository {
     this.tokenStorage.saveTokens(
       auth.access_token,
       auth.refresh_token,
-      auth.expires_in
+      auth.expires_in,
+      auth.refresh_expires_in
     );
 
     this.authApi.setAccessToken(auth.access_token);
