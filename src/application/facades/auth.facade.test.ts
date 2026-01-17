@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AuthFacade } from './auth.facade';
 import { LoginUseCase } from '../use-cases/login.use-case';
+import { RefreshTokenUseCase } from '../use-cases/refresh-token.use-case';
 import type { IAuthRepository } from '../../domain/repositories/auth.repository';
 import { TokenStorage } from '../../infrastructure/storage/token.storage';
 import { firstValueFrom } from 'rxjs';
@@ -8,6 +9,7 @@ import { firstValueFrom } from 'rxjs';
 describe('AuthFacade', () => {
   let facade: AuthFacade;
   let mockLoginUseCase: LoginUseCase;
+  let mockRefreshTokenUseCase: RefreshTokenUseCase;
   let mockRepository: IAuthRepository;
   let mockTokenStorage: TokenStorage;
 
@@ -22,14 +24,17 @@ describe('AuthFacade', () => {
       getAccessToken: vi.fn().mockReturnValue(null),
       getRefreshToken: vi.fn().mockReturnValue(null),
       getExpiresIn: vi.fn().mockReturnValue(null),
+      getRefreshExpiresIn: vi.fn().mockReturnValue(null),
       clearTokens: vi.fn().mockImplementation(() => { }),
       hasTokens: vi.fn().mockReturnValue(false),
     } as unknown as TokenStorage;
 
     mockLoginUseCase = new LoginUseCase(mockRepository);
+    mockRefreshTokenUseCase = new RefreshTokenUseCase(mockRepository);
 
     facade = new AuthFacade(
       mockLoginUseCase,
+      mockRefreshTokenUseCase,
       mockRepository,
       mockTokenStorage as TokenStorage
     );
