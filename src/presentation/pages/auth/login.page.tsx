@@ -9,7 +9,10 @@ export function LoginPage() {
   const navigate = useNavigate();
   const isLoading = useObservable(authFacade.isLoading$, false);
   const error = useObservable(authFacade.error$, null);
-  const isAuthenticated = useObservable(authFacade.isAuthenticated$, false);
+  const isAuthenticated = useObservable(
+    authFacade.isAuthenticated$,
+    authFacade.isAuthenticatedSync(),
+  );
 
   const [formData, setFormData] = useState({
     username: "",

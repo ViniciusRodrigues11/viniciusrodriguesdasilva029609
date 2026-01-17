@@ -12,7 +12,12 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const isAuthenticated = useObservable(authFacade.isAuthenticated$, false);
+  const isAuthenticated = useObservable(
+    authFacade.isAuthenticated$,
+    authFacade.isAuthenticatedSync(),
+  );
+
+  console.log("ProtectedRoute - isAuthenticated:", isAuthenticated);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
