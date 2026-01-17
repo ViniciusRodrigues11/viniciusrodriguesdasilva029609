@@ -9,9 +9,9 @@ import { ProtectedRoute } from "./protected.route";
 import { LoadingFallback } from "../components/loading-fallback";
 
 // Lazy load das páginas
-const PetsPage = lazy(() =>
-  import("../pages/pets/pets.page").then((module) => ({
-    default: module.PetsPage,
+const PetsModule = lazy(() =>
+  import("./modules/pets.routes").then((module) => ({
+    default: module.default,
   })),
 );
 
@@ -46,11 +46,11 @@ export const routes: RouteObject[] = [
     element: <div>Em construção</div>, // TODO: Implementar reset
   },
   {
-    path: "/pets",
+    path: "/pets/*",
     element: (
       <ProtectedRoute>
         <Suspense fallback={<LoadingFallback />}>
-          <PetsPage />
+          <PetsModule />
         </Suspense>
       </ProtectedRoute>
     ),
