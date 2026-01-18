@@ -1,6 +1,7 @@
 import { BehaviorSubject, type Observable } from 'rxjs';
 import type { TutorEntity } from '../../domain/entities/tutor.entity';
 import type { ListTutoresUseCase } from '../use-cases/list-tutores.use-case';
+import type { TutorApi, CreateTutorApiPayload } from '../../infrastructure/api/tutor.api';
 
 export interface TutorPaginationState {
   page: number;
@@ -18,7 +19,10 @@ export class TutorFacade {
     total: null,
   });
 
-  constructor(private readonly listTutoresUseCase: ListTutoresUseCase) { }
+  constructor(
+    private readonly listTutoresUseCase: ListTutoresUseCase,
+    private readonly tutorApi: TutorApi
+  ) { }
 
   get tutores$(): Observable<TutorEntity[]> {
     return this.tutoresSubject.asObservable();
@@ -59,6 +63,22 @@ export class TutorFacade {
       .finally(() => {
         this.loadingSubject.next(false);
       });
+  }
+
+  async addTutor(tutorData: CreateTutorApiPayload): Promise<TutorEntity> {
+    this.loadingSubject.next(true);
+    this.errorSubject.next(null);
+
+    try {
+      const createdTutor = await this.tutorApi.createTutor(tutorData);
+      return createdTutor;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao adicionar tutor';
+      this.errorSubject.next(errorMessage);
+      throw error;
+    } finally {
+      this.loadingSubject.next(false);
+    }
   }
 
   reset(): void {

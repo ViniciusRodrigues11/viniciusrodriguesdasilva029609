@@ -11,4 +11,4 @@ const tutorApi = new TutorApi(axiosClient.instance);
 const tutorRepository = new TutorRepositoryImpl(tutorApi);
 const listTutoresUseCase = new ListTutoresUseCase(tutorRepository);
 
-export const tutorFacade = new TutorFacade(listTutoresUseCase);
+export const tutorFacade = new TutorFacade(listTutoresUseCase, tutorApi);

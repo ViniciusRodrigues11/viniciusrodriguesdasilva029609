@@ -29,6 +29,14 @@ export interface ListTutoresApiParams {
   nome?: string;
 }
 
+export interface CreateTutorApiPayload {
+  nome: string;
+  email: string;
+  telefone: string;
+  endereco: string;
+  cpf: number;
+}
+
 export class TutorApi {
   constructor(private readonly httpClient: AxiosInstance) { }
 
@@ -37,6 +45,11 @@ export class TutorApi {
       params,
     });
 
+    return response.data;
+  }
+
+  async createTutor(payload: CreateTutorApiPayload): Promise<TutorApiResponse> {
+    const response = await this.httpClient.post<TutorApiResponse>('/v1/tutores', payload);
     return response.data;
   }
 }
