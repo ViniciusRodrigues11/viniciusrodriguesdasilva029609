@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TutorCard } from "../../components/tutores/tutor-card";
+import { Pagination } from "../../components/pagination";
 import { useObservable } from "../../hooks/use-observable.hook";
 import { tutorFacade } from "../../../services/tutor.service";
 import type { TutorPaginationState } from "../../../application/facades/tutor.facade";
@@ -135,32 +136,15 @@ export function TutoresListPage() {
         ))}
       </div>
 
-      <div className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm">
-        <div className="text-sm text-slate-600">
-          Página {pagination.page}
-          {pagination.total
-            ? ` de ${Math.ceil(pagination.total / pagination.pageSize)}`
-            : null}
-        </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={handlePrevPage}
-            disabled={pagination.page <= 1 || loading}
-            className="rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            Anterior
-          </button>
-          <button
-            type="button"
-            onClick={handleNextPage}
-            disabled={!hasNextPage || loading}
-            className="rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            Próximo
-          </button>
-        </div>
-      </div>
+      <Pagination
+        currentPage={pagination.page}
+        pageSize={pagination.pageSize}
+        total={pagination.total}
+        isLoading={loading}
+        hasNextPage={hasNextPage}
+        onPreviousPage={handlePrevPage}
+        onNextPage={handleNextPage}
+      />
     </div>
   );
 }
