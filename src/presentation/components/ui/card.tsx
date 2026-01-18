@@ -93,9 +93,7 @@ export function Card({
   };
 
   return (
-    <button
-      type="button"
-      onClick={handleClick}
+    <div
       className={`group relative flex h-80 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-md transition duration-300 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 ${className}`}
     >
       {/* Image Section */}
@@ -135,6 +133,6 @@ export function Card({
         {/* Actions */}
         {renderActions()}
       </div>
-    </button>
+    </div>
   );
 }
