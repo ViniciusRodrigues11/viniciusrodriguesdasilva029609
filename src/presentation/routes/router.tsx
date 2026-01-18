@@ -7,6 +7,7 @@ import { Suspense, lazy } from "react";
 import { LoginPage } from "../pages/auth/login.page";
 import { ProtectedRoute } from "./protected.route";
 import { LoadingFallback } from "../components/loading-fallback";
+import { MainLayout } from "../components/layout/main-layout";
 
 // Lazy load das páginas
 const PetsModule = lazy(() =>
@@ -46,24 +47,29 @@ export const routes: RouteObject[] = [
     element: <div>Em construção</div>, // TODO: Implementar reset
   },
   {
-    path: "/pets/*",
     element: (
       <ProtectedRoute>
-        <Suspense fallback={<LoadingFallback />}>
-          <PetsModule />
-        </Suspense>
+        <MainLayout />
       </ProtectedRoute>
     ),
-  },
-  {
-    path: "/tutores",
-    element: (
-      <ProtectedRoute>
-        <Suspense fallback={<LoadingFallback />}>
-          <TutoresPage />
-        </Suspense>
-      </ProtectedRoute>
-    ),
+    children: [
+      {
+        path: "/pets/*",
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <PetsModule />
+          </Suspense>
+        ),
+      },
+      {
+        path: "/tutores",
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <TutoresPage />
+          </Suspense>
+        ),
+      },
+    ],
   },
   {
     path: "/health",
