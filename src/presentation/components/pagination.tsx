@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 interface PaginationProps {
   currentPage: number;
   pageSize: number;
@@ -18,9 +20,36 @@ export function Pagination({
   onNextPage,
 }: PaginationProps) {
   const totalPages = total ? Math.ceil(total / pageSize) : null;
+  const [isAtBottom, setIsAtBottom] = useState(false);
+
+  useEffect(() => {
+    const scrollContainer = document.querySelector("main.overflow-y-auto");
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const scrollHeight = scrollContainer.scrollHeight;
+      const scrollTop = scrollContainer.scrollTop;
+      const clientHeight = scrollContainer.clientHeight;
+      const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
+      const isBottom = distanceFromBottom < 100;
+
+      setIsAtBottom(isBottom);
+    };
+
+    scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+
+    return () => scrollContainer.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm">
+    <div
+      className={`flex items-center justify-between gap-3 rounded-lg border border-gray-400 bg-slate-50 px-4 py-3 transition-all ${
+        !isAtBottom
+          ? "fixed md:sticky bottom-4 left-1/2 z-40 md:max-w-md w-[90%] -translate-x-1/2 shadow-2xl"
+          : "relative shadow-sm"
+      }`}
+    >
       <div className="text-sm text-slate-600">
         Página {currentPage}
         {totalPages ? ` de ${totalPages}` : null}

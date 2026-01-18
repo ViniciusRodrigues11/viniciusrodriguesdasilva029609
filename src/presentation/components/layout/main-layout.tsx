@@ -11,7 +11,6 @@ export function MainLayout() {
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       <div className="flex-1 flex flex-col h-screen lg:ml-0">
-        {/* Header com botão hambúrguer (mobile) */}
         <header className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 sticky top-0 z-30">
           <button
             onClick={() => setIsSidebarOpen(true)}
@@ -22,7 +21,6 @@ export function MainLayout() {
           </button>
         </header>
 
-        {/* Conteúdo principal */}
         <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>
