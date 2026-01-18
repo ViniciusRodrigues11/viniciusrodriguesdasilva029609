@@ -26,7 +26,7 @@ export function PetCard({ pet, onClick }: PetCardProps) {
             className="h-full w-full object-cover transition duration-300 group-hover:scale-110"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-100 to-slate-100 text-6xl font-bold text-indigo-300">
+          <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-indigo-100 to-slate-100 text-6xl font-bold text-indigo-300">
             {pet.nome.charAt(0).toUpperCase()}
           </div>
         )}

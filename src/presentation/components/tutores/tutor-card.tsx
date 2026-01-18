@@ -27,7 +27,7 @@ export function TutorCard({ tutor, onClick }: TutorCardProps) {
             className="h-full w-full object-cover transition duration-300 group-hover:scale-110"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-100 to-slate-100">
+          <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-indigo-100 to-slate-100">
             <User className="h-16 w-16 text-indigo-300" strokeWidth={1.5} />
           </div>
         )}
