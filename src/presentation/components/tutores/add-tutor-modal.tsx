@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
 import { ActionModal } from "../modal/action-modal";
+import { AddButton } from "../ui/add-button";
 import { tutorFacade } from "../../../services/tutor.service";
 
 interface AddTutorModalProps {
@@ -171,13 +171,7 @@ export function AddTutorModal({ onTutorAdded }: AddTutorModalProps) {
 
   return (
     <>
-      <button
-        onClick={() => setIsOpen(true)}
-        className="inline-flex text-xs items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
-      >
-        <Plus size={20} />
-        Novo Tutor
-      </button>
+      <AddButton onClick={() => setIsOpen(true)} label="Novo Tutor" />
 
       <ActionModal
         isOpen={isOpen}
