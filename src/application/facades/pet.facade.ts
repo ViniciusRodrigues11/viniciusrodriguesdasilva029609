@@ -14,7 +14,7 @@ export class PetFacade {
   private readonly errorSubject = new BehaviorSubject<string | null>(null);
   private readonly paginationSubject = new BehaviorSubject<PetPaginationState>({
     page: 1,
-    pageSize: 10,
+    pageSize: 9,
     total: null,
   });
 

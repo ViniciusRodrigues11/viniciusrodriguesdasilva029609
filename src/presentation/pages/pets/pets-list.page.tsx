@@ -6,7 +6,7 @@ import { petFacade } from "../../../services/pet.service";
 import type { PetPaginationState } from "../../../application/facades/pet.facade";
 import type { PetEntity } from "../../../domain/entities/pet.entity";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 9;
 const SEARCH_DEBOUNCE = 300;
 
 export function PetsListPage() {
