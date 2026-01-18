@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TutorCard } from "../../components/tutores/tutor-card";
 import { AddTutorModal } from "../../components/tutores/add-tutor-modal";
-import { Pagination } from "../../components/pagination";
+import { Pagination } from "../../components/ui/pagination";
 import { useObservable } from "../../hooks/use-observable.hook";
 import { tutorFacade } from "../../../services/tutor.service";
 import type { TutorPaginationState } from "../../../application/facades/tutor.facade";

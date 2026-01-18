@@ -1,5 +1,5 @@
 import type { PetEntity } from "../../../domain/entities/pet.entity";
-import { Card } from "../card";
+import { Card } from "../ui/card";
 
 interface PetCardProps {
   pet: PetEntity;

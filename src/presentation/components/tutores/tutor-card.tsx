@@ -1,6 +1,6 @@
 import type { TutorEntity } from "../../../domain/entities/tutor.entity";
 import { User, Mail, Phone, MapPin } from "lucide-react";
-import { Card } from "../card";
+import { Card } from "../ui/card";
 
 interface TutorCardProps {
   tutor: TutorEntity;

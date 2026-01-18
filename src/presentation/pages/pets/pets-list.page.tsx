@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PetCard } from "../../components/pets/pet-card";
 import { AddPetModal } from "../../components/pets/add-pet-modal";
-import { Pagination } from "../../components/pagination";
+import { Pagination } from "../../components/ui/pagination";
 import { useObservable } from "../../hooks/use-observable.hook";
 import { petFacade } from "../../../services/pet.service";
 import type { PetPaginationState } from "../../../application/facades/pet.facade";

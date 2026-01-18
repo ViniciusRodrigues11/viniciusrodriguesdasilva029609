@@ -6,7 +6,7 @@ import {
 import { Suspense, lazy } from "react";
 import { LoginPage } from "../pages/auth/login.page";
 import { ProtectedRoute } from "./protected.route";
-import { LoadingFallback } from "../components/loading-fallback";
+import { LoadingFallback } from "../components/ui/loading-fallback";
 import { MainLayout } from "../components/layout/main-layout";
 
 // Lazy load das páginas
