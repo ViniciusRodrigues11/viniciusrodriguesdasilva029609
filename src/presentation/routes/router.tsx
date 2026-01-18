@@ -16,9 +16,9 @@ const PetsModule = lazy(() =>
   })),
 );
 
-const TutoresPage = lazy(() =>
-  import("../pages/tutores/tutores.page").then((module) => ({
-    default: module.TutoresPage,
+const TutoresModule = lazy(() =>
+  import("./modules/tutores.routes").then((module) => ({
+    default: module.default,
   })),
 );
 
@@ -62,10 +62,10 @@ export const routes: RouteObject[] = [
         ),
       },
       {
-        path: "/tutores",
+        path: "/tutores/*",
         element: (
           <Suspense fallback={<LoadingFallback />}>
-            <TutoresPage />
+            <TutoresModule />
           </Suspense>
         ),
       },

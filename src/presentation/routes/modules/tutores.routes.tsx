@@ -1,4 +1,4 @@
-import { TutoresListPage } from "./tutores-list.page";
+import { TutoresListPage } from "../../pages/tutores/tutores-list.page";
 
 export function TutoresModule() {
   return <TutoresListPage />;
