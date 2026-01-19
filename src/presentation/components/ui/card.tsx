@@ -26,7 +26,6 @@ export function Card({
   onEdit,
   onDelete,
   image,
-  imageHeight = "h-48",
   imageAltContent,
   title,
   subtitle,
@@ -66,7 +65,7 @@ export function Card({
           <button
             type="button"
             onClick={handleClick}
-            className="flex flex-1 items-center justify-center gap-2 rounded-md bg-indigo-50 px-3 py-2 text-xs font-medium text-indigo-700 transition hover:bg-indigo-100"
+            className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md bg-indigo-50 px-3 py-2 text-xs font-medium text-indigo-700 transition hover:bg-indigo-100"
           >
             Ver
             <ChevronRight className="h-3.5 w-3.5" />
@@ -75,7 +74,7 @@ export function Card({
         <button
           type="button"
           onClick={handleEdit}
-          className="flex items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center cursor-pointer justify-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={!onEdit}
         >
           <Edit2 className="h-3.5 w-3.5" />
@@ -83,7 +82,7 @@ export function Card({
         <button
           type="button"
           onClick={handleDelete}
-          className="flex items-center justify-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700 transition hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center cursor-pointer justify-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700 transition hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={!onDelete}
         >
           <Trash2 className="h-3.5 w-3.5" />
@@ -98,9 +97,7 @@ export function Card({
          transition duration-300 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 ${className}`}
     >
       {/* Image Section */}
-      <div
-        className={`relative ${imageHeight} w-full overflow-hidden bg-slate-100`}
-      >
+      <div className={`relative flex-1 w-full overflow-hidden bg-slate-100`}>
         {image?.url ? (
           <img
             src={image.url}
@@ -116,9 +113,8 @@ export function Card({
 
       {/* Content Section */}
       <div className="flex flex-1 flex-col justify-between gap-3 p-5 text-left">
-        {/* Title and Subtitle */}
         <div className="space-y-2">
-          <h3 className="text-base font-bold text-slate-900 line-clamp-2">
+          <h3 className="text-base font-bold text-slate-900 line-clamp-1">
             {title}
           </h3>
           {subtitle && (

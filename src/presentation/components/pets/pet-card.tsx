@@ -22,13 +22,17 @@ export function PetCard({ pet, onClick, onEdit, onDelete }: PetCardProps) {
         </div>
       }
       title={pet.nome}
-      subtitle={pet.raca ? `${pet.raca}` : "Raça não informada"}
+      subtitle={pet.raca ? `Raça: ${pet.raca}` : "Raça não informada"}
       metadata={
         typeof pet.idade === "number" ? (
           <span className="shrink-0 rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-semibold text-indigo-700">
-            {pet.idade}a
+            {pet.idade} anos
           </span>
-        ) : null
+        ) : (
+          <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+            Idade não informada
+          </span>
+        )
       }
     />
   );
