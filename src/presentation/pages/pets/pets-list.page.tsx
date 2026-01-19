@@ -4,6 +4,7 @@ import { PetCard } from "../../components/pets/pet-card";
 import { AddPetModal } from "../../components/pets/add-pet-modal";
 import { Pagination } from "../../components/ui/pagination";
 import { SearchInput } from "../../components/ui/search-input";
+import { EmptyState } from "../../components/ui/empty-state";
 import { ActionModal } from "../../components/modal/action-modal";
 import { useObservable } from "../../hooks/use-observable.hook";
 import { petFacade } from "../../../services/pet.service";
@@ -145,11 +146,7 @@ export function PetsListPage() {
           </div>
         )}
 
-        {isEmptyState && (
-          <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-8 text-center text-slate-600">
-            Nenhum pet encontrado para a busca.
-          </div>
-        )}
+        {isEmptyState && <EmptyState message="Ops! Nenhum pet por aqui..." />}
 
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {pets.map((pet) => (

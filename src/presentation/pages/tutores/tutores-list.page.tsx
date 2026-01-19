@@ -4,6 +4,7 @@ import { TutorCard } from "../../components/tutores/tutor-card";
 import { AddTutorModal } from "../../components/tutores/add-tutor-modal";
 import { Pagination } from "../../components/ui/pagination";
 import { SearchInput } from "../../components/ui/search-input";
+import { EmptyState } from "../../components/ui/empty-state";
 import { ActionModal } from "../../components/modal/action-modal";
 import { useObservable } from "../../hooks/use-observable.hook";
 import { tutorFacade } from "../../../services/tutor.service";
@@ -147,9 +148,7 @@ export function TutoresListPage() {
         )}
 
         {isEmptyState && (
-          <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-8 text-center text-slate-600">
-            Nenhum tutor encontrado para a busca.
-          </div>
+          <EmptyState message="Nenhum tutor por aqui... Talvez os pets queriam passear!" />
         )}
 
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
