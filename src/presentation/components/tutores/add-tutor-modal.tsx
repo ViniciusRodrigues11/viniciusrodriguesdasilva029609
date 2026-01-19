@@ -321,8 +321,6 @@ export function AddTutorModal({ onTutorAdded }: AddTutorModalProps) {
               <p className="mt-1 text-xs text-red-600">{errors.endereco}</p>
             )}
           </div>
-
-          <p className="text-xs text-slate-500">* Campos obrigatórios</p>
         </form>
       </ActionModal>
     </>

@@ -67,7 +67,7 @@ export function ActionModal({
             type="button"
             onClick={onClose}
             disabled={isDisabled}
-            className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-2 font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
+            className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-2 font-medium text-slate-700 transition hover:bg-slate-50 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
           >
             {cancelButtonLabel}
           </button>
@@ -75,7 +75,7 @@ export function ActionModal({
             type="button"
             onClick={handleConfirm}
             disabled={isDisabled}
-            className={`flex-1 rounded-lg px-4 py-2 font-medium transition disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-1 ${confirmButtonClasses[confirmButtonVariant]}`}
+            className={`flex-1 rounded-lg px-4 py-2 font-medium transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-1 ${confirmButtonClasses[confirmButtonVariant]}`}
           >
             {isDisabled ? (
               <span className="flex items-center justify-center gap-2">
