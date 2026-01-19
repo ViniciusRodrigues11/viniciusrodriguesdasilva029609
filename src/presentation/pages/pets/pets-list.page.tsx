@@ -5,7 +5,7 @@ import { AddPetModal } from "../../components/pets/add-pet-modal";
 import { Pagination } from "../../components/ui/pagination";
 import { SearchInput } from "../../components/ui/search-input";
 import { EmptyState } from "../../components/ui/empty-state";
-import { ActionModal } from "../../components/modal/action-modal";
+import { ActionModal } from "../../components/action-modal/action-modal";
 import { useObservable } from "../../hooks/use-observable.hook";
 import { petFacade } from "../../../services/pet.service";
 import type { PetPaginationState } from "../../../application/facades/pet.facade";

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionModal } from "../modal/action-modal";
+import { ActionModal } from "../action-modal/action-modal";
 import { AddButton } from "../ui/add-button";
 
 interface AddPetModalProps {
