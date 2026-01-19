@@ -39,4 +39,8 @@ export class PetRepositoryImpl implements IPetRepository {
       total: response.total ?? null,
     };
   }
+
+  async delete(petId: number): Promise<void> {
+    await this.petApi.deletePet(petId);
+  }
 }

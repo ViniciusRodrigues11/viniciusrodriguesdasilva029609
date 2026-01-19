@@ -8,4 +8,5 @@ export interface ListPetsFilters {
 
 export interface IPetRepository {
   list(filters: ListPetsFilters): Promise<PaginatedPetsEntity>;
+  delete(petId: number): Promise<void>;
 }

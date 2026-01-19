@@ -60,6 +60,34 @@ export class PetFacade {
       });
   }
 
+  async deletePet(petId: number): Promise<void> {
+    this.loadingSubject.next(true);
+    this.errorSubject.next(null);
+
+    try {
+      await this.listPetsUseCase['petRepository'].delete(petId);
+
+      // Remove o pet da lista atual
+      const currentPets = this.petsSubject.getValue();
+      const updatedPets = currentPets.filter(pet => pet.id !== petId);
+      this.petsSubject.next(updatedPets);
+
+      // Atualiza o total se disponível
+      const currentPagination = this.paginationSubject.getValue();
+      if (currentPagination.total !== null) {
+        this.paginationSubject.next({
+          ...currentPagination,
+          total: currentPagination.total - 1,
+        });
+      }
+    } catch (error: unknown) {
+      this.errorSubject.next(this.extractErrorMessage(error));
+      throw error;
+    } finally {
+      this.loadingSubject.next(false);
+    }
+  }
+
   private extractErrorMessage(error: unknown): string {
     if (error && typeof error === 'object' && 'response' in error) {
       const httpError = error as { response?: { status?: number; data?: { message?: string } } };

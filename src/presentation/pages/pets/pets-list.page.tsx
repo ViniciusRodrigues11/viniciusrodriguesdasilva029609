@@ -4,6 +4,7 @@ import { PetCard } from "../../components/pets/pet-card";
 import { AddPetModal } from "../../components/pets/add-pet-modal";
 import { Pagination } from "../../components/ui/pagination";
 import { SearchInput } from "../../components/ui/search-input";
+import { ActionModal } from "../../components/modal/action-modal";
 import { useObservable } from "../../hooks/use-observable.hook";
 import { petFacade } from "../../../services/pet.service";
 import type { PetPaginationState } from "../../../application/facades/pet.facade";
@@ -27,6 +28,8 @@ export function PetsListPage() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [petToDelete, setPetToDelete] = useState<PetEntity | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -66,6 +69,38 @@ export function PetsListPage() {
 
   const handlePetAdded = () => {
     petFacade.load(1, PAGE_SIZE, debouncedQuery);
+  };
+
+  const handleDeleteClick = (petId: number) => {
+    const pet = pets.find((p) => p.id === petId);
+    if (pet) {
+      setPetToDelete(pet);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!petToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await petFacade.deletePet(petToDelete.id);
+      setPetToDelete(null);
+
+      // Se a página atual ficou vazia, volta pra página anterior
+      const currentPets = pets.filter((p) => p.id !== petToDelete.id);
+      if (currentPets.length === 0 && pagination.page > 1) {
+        petFacade.load(pagination.page - 1, PAGE_SIZE, debouncedQuery);
+      }
+    } catch (error) {
+      // Erro já tratado pela facade
+      console.error("Erro ao excluir pet:", error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setPetToDelete(null);
   };
 
   const hasNextPage = useMemo(() => {
@@ -118,9 +153,31 @@ export function PetsListPage() {
 
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {pets.map((pet) => (
-            <PetCard key={pet.id} pet={pet} onClick={goToPetDetail} />
+            <PetCard
+              key={pet.id}
+              pet={pet}
+              onClick={goToPetDetail}
+              onDelete={handleDeleteClick}
+            />
           ))}
         </div>
+
+        <ActionModal
+          isOpen={!!petToDelete}
+          title="Excluir Pet"
+          description="Esta ação não pode ser desfeita."
+          onClose={handleCancelDelete}
+          onConfirm={handleConfirmDelete}
+          confirmButtonLabel="Excluir"
+          cancelButtonLabel="Cancelar"
+          confirmButtonVariant="danger"
+          isLoading={isDeleting}
+        >
+          <p className="text-slate-700">
+            Tem certeza que deseja excluir o pet{" "}
+            <strong>{petToDelete?.nome}</strong>?
+          </p>
+        </ActionModal>
 
         <Pagination
           currentPage={pagination.page}

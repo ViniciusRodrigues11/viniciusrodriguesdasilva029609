@@ -37,4 +37,8 @@ export class PetApi {
 
     return response.data;
   }
+
+  async deletePet(petId: number): Promise<void> {
+    await this.httpClient.delete(`/v1/pets/${petId}`);
+  }
 }
