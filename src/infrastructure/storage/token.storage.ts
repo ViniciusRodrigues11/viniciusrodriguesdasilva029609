@@ -1,19 +1,27 @@
 export class TokenStorage {
   private readonly accessTokenKey = 'auth:access_token';
   private readonly refreshTokenKey = 'auth:refresh_token';
-  private readonly expiresInKey = 'auth:expires_in';
-  private readonly refreshExpiresInKey = 'auth:refresh_expires_in';
+  private readonly accessExpiresAtKey = 'auth:access_expires_at';
+  private readonly refreshExpiresAtKey = 'auth:refresh_expires_at';
 
   saveTokens(
     accessToken: string,
     refreshToken: string,
     expiresIn: number,
-    refreshExpiresIn: number
+    refreshExpiresIn?: number
   ): void {
     localStorage.setItem(this.accessTokenKey, accessToken);
     localStorage.setItem(this.refreshTokenKey, refreshToken);
-    localStorage.setItem(this.expiresInKey, String(expiresIn));
-    localStorage.setItem(this.refreshExpiresInKey, String(refreshExpiresIn));
+
+    // Calcula timestamps absolutos de expiração (expires_in vem em segundos)
+    const now = Date.now();
+    const accessExpiresAt = now + expiresIn * 1000;
+    localStorage.setItem(this.accessExpiresAtKey, String(accessExpiresAt));
+
+    if (typeof refreshExpiresIn === 'number') {
+      const refreshExpiresAt = now + refreshExpiresIn * 1000;
+      localStorage.setItem(this.refreshExpiresAtKey, String(refreshExpiresAt));
+    }
   }
 
   getAccessToken(): string | null {
@@ -24,21 +32,21 @@ export class TokenStorage {
     return localStorage.getItem(this.refreshTokenKey);
   }
 
-  getExpiresIn(): number | null {
-    const expiresIn = localStorage.getItem(this.expiresInKey);
-    return expiresIn ? Number(expiresIn) : null;
+  getAccessExpiresAt(): number | null {
+    const value = localStorage.getItem(this.accessExpiresAtKey);
+    return value ? Number(value) : null;
   }
 
-  getRefreshExpiresIn(): number | null {
-    const refreshExpiresIn = localStorage.getItem(this.refreshExpiresInKey);
-    return refreshExpiresIn ? Number(refreshExpiresIn) : null;
+  getRefreshExpiresAt(): number | null {
+    const value = localStorage.getItem(this.refreshExpiresAtKey);
+    return value ? Number(value) : null;
   }
 
   clearTokens(): void {
     localStorage.removeItem(this.accessTokenKey);
     localStorage.removeItem(this.refreshTokenKey);
-    localStorage.removeItem(this.expiresInKey);
-    localStorage.removeItem(this.refreshExpiresInKey);
+    localStorage.removeItem(this.accessExpiresAtKey);
+    localStorage.removeItem(this.refreshExpiresAtKey);
   }
 
   hasTokens(): boolean {

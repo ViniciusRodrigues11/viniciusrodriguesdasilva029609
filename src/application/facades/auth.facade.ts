@@ -19,6 +19,7 @@ export class AuthFacade {
     isLoading: false,
     error: null,
   });
+  private refreshTimeoutId: number | null = null;
 
   constructor(
     readonly loginUseCase: LoginUseCase,
@@ -52,6 +53,10 @@ export class AuthFacade {
         error: loginState.error,
         isAuthenticated: !loginState.error && !loginState.isLoading,
       });
+
+      if (!loginState.error && !loginState.isLoading) {
+        this.scheduleTokenRefresh();
+      }
     });
   }
 
@@ -62,6 +67,11 @@ export class AuthFacade {
       isLoading: false,
       error: null,
     });
+
+    if (this.refreshTimeoutId !== null) {
+      clearTimeout(this.refreshTimeoutId);
+      this.refreshTimeoutId = null;
+    }
   }
 
   refreshToken(): void {
@@ -86,6 +96,11 @@ export class AuthFacade {
       if (refreshState.error) {
         this.logout();
       }
+
+      // Reagendar próximo refresh após sucesso
+      if (!refreshState.error && !refreshState.isLoading) {
+        this.scheduleTokenRefresh();
+      }
     });
   }
 
@@ -100,6 +115,10 @@ export class AuthFacade {
       isLoading: false,
       error: null,
     });
+
+    if (hasTokens) {
+      this.scheduleTokenRefresh();
+    }
   }
 
   private updateAuthState(state: Partial<AuthState>): void {
@@ -108,5 +127,34 @@ export class AuthFacade {
       ...currentState,
       ...state,
     });
+  }
+
+  private scheduleTokenRefresh(): void {
+    const accessExpiresAt = this.tokenStorage.getAccessExpiresAt();
+
+    if (!accessExpiresAt) {
+      return;
+    }
+
+    const now = Date.now();
+    const leadMs = 3_000; // renova 3s antes de expirar
+    const msUntilRefresh = accessExpiresAt - now - leadMs;
+
+    // Se o token já expirou ou vai expirar em menos de 5s, não agenda
+    // Deixa o interceptor do axios lidar com isso no próximo request
+    if (msUntilRefresh < 5_000) {
+      return;
+    }
+
+    if (this.refreshTimeoutId !== null) {
+      clearTimeout(this.refreshTimeoutId);
+    }
+
+    this.refreshTimeoutId = window.setTimeout(() => {
+      // Garante que ainda há tokens válidos antes de tentar
+      if (this.tokenStorage.hasTokens()) {
+        this.refreshToken();
+      }
+    }, msUntilRefresh);
   }
 }

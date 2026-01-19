@@ -15,7 +15,7 @@ describe('TokenStorage', () => {
       // Arrange
       const accessToken = 'access-token-123';
       const refreshToken = 'refresh-token-456';
-      const expiresIn = 3600;
+      const expiresIn = 3600000; // 1h em milissegundos
 
       // Act
       storage.saveTokens(accessToken, refreshToken, expiresIn);
@@ -23,7 +23,7 @@ describe('TokenStorage', () => {
       // Assert
       expect(storage.getAccessToken()).toBe(accessToken);
       expect(storage.getRefreshToken()).toBe(refreshToken);
-      expect(storage.getExpiresIn()).toBe(expiresIn);
+      expect(storage.getAccessExpiresAt()).toBeGreaterThan(Date.now());
     });
   });
 
@@ -31,7 +31,7 @@ describe('TokenStorage', () => {
     it('deve retornar o token de acesso salvo', () => {
       // Arrange
       const token = 'access-token-123';
-      storage.saveTokens(token, 'refresh', 3600);
+      storage.saveTokens(token, 'refresh', 3600000);
 
       // Act
       const result = storage.getAccessToken();
@@ -53,7 +53,7 @@ describe('TokenStorage', () => {
     it('deve retornar o token de atualização salvo', () => {
       // Arrange
       const token = 'refresh-token-456';
-      storage.saveTokens('access', token, 3600);
+      storage.saveTokens('access', token, 3600000);
 
       // Act
       const result = storage.getRefreshToken();
@@ -66,7 +66,7 @@ describe('TokenStorage', () => {
   describe('clearTokens', () => {
     it('deve limpar todos os tokens', () => {
       // Arrange
-      storage.saveTokens('access', 'refresh', 3600);
+      storage.saveTokens('access', 'refresh', 3600000);
 
       // Act
       storage.clearTokens();
@@ -74,14 +74,14 @@ describe('TokenStorage', () => {
       // Assert
       expect(storage.getAccessToken()).toBeNull();
       expect(storage.getRefreshToken()).toBeNull();
-      expect(storage.getExpiresIn()).toBeNull();
+      expect(storage.getAccessExpiresAt()).toBeNull();
     });
   });
 
   describe('hasTokens', () => {
     it('deve retornar true se há tokens salvos', () => {
       // Arrange
-      storage.saveTokens('access', 'refresh', 3600);
+      storage.saveTokens('access', 'refresh', 3600000);
 
       // Act
       const result = storage.hasTokens();

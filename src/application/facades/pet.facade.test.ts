@@ -28,6 +28,7 @@ describe('PetFacade', () => {
   beforeEach(() => {
     mockRepository = {
       list: vi.fn(),
+      delete: vi.fn(),
     };
 
     mockListPetsUseCase = new ListPetsUseCase(mockRepository);
