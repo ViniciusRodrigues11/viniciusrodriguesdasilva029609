@@ -52,4 +52,8 @@ export class TutorApi {
     const response = await this.httpClient.post<TutorApiResponse>('/v1/tutores', payload);
     return response.data;
   }
+
+  async deleteTutor(tutorId: number): Promise<void> {
+    await this.httpClient.delete(`/v1/tutores/${tutorId}`);
+  }
 }

@@ -1,6 +1,7 @@
 import { BehaviorSubject, type Observable } from 'rxjs';
 import type { TutorEntity } from '../../domain/entities/tutor.entity';
 import type { ListTutoresUseCase } from '../use-cases/list-tutores.use-case';
+import type { DeleteTutorUseCase } from '../use-cases/delete-tutor.use-case';
 import type { TutorApi, CreateTutorApiPayload } from '../../infrastructure/api/tutor.api';
 
 export interface TutorPaginationState {
@@ -21,6 +22,7 @@ export class TutorFacade {
 
   constructor(
     private readonly listTutoresUseCase: ListTutoresUseCase,
+    private readonly deleteTutorUseCase: DeleteTutorUseCase,
     private readonly tutorApi: TutorApi
   ) { }
 
@@ -55,9 +57,7 @@ export class TutorFacade {
         });
       })
       .catch((error) => {
-        this.errorSubject.next(
-          error instanceof Error ? error.message : 'Erro ao carregar tutores'
-        );
+        this.errorSubject.next(this.extractErrorMessage(error));
         this.tutoresSubject.next([]);
       })
       .finally(() => {
@@ -81,6 +81,31 @@ export class TutorFacade {
     }
   }
 
+  async deleteTutor(tutorId: number): Promise<void> {
+    this.loadingSubject.next(true);
+    this.errorSubject.next(null);
+
+    try {
+      await this.deleteTutorUseCase.execute(tutorId);
+
+      const currentTutores = this.tutoresSubject.getValue();
+      this.tutoresSubject.next(currentTutores.filter((tutor) => tutor.id !== tutorId));
+
+      const currentPagination = this.paginationSubject.getValue();
+      if (currentPagination.total !== null) {
+        this.paginationSubject.next({
+          ...currentPagination,
+          total: Math.max(0, currentPagination.total - 1),
+        });
+      }
+    } catch (error) {
+      this.errorSubject.next(this.extractErrorMessage(error));
+      throw error;
+    } finally {
+      this.loadingSubject.next(false);
+    }
+  }
+
   reset(): void {
     this.tutoresSubject.next([]);
     this.loadingSubject.next(false);
@@ -90,5 +115,21 @@ export class TutorFacade {
       pageSize: 9,
       total: null,
     });
+  }
+
+  private extractErrorMessage(error: unknown): string {
+    if (error && typeof error === 'object' && 'response' in error) {
+      const httpError = error as { response?: { data?: { message?: string }; status?: number } };
+      const status = httpError.response?.status;
+      if (status === 401) return 'Sessão expirada. Faça login novamente.';
+      return httpError.response?.data?.message ?? 'Erro ao processar solicitação.';
+    }
+
+    if (error instanceof Error) {
+      if (error.message === 'Network Error') return 'Erro de conexão com o servidor.';
+      return error.message || 'Erro ao processar solicitação.';
+    }
+
+    return 'Erro ao processar solicitação.';
   }
 }

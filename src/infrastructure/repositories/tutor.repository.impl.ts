@@ -20,6 +20,10 @@ export class TutorRepositoryImpl implements ITutorRepository {
     };
   }
 
+  async delete(tutorId: number): Promise<void> {
+    await this.tutorApi.deleteTutor(tutorId);
+  }
+
   private mapToDomain(tutorApi: TutorApiResponse): TutorEntity {
     return {
       id: tutorApi.id,

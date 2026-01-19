@@ -4,6 +4,7 @@ import { TutorCard } from "../../components/tutores/tutor-card";
 import { AddTutorModal } from "../../components/tutores/add-tutor-modal";
 import { Pagination } from "../../components/ui/pagination";
 import { SearchInput } from "../../components/ui/search-input";
+import { ActionModal } from "../../components/modal/action-modal";
 import { useObservable } from "../../hooks/use-observable.hook";
 import { tutorFacade } from "../../../services/tutor.service";
 import type { TutorPaginationState } from "../../../application/facades/tutor.facade";
@@ -30,6 +31,8 @@ export function TutoresListPage() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [tutorToDelete, setTutorToDelete] = useState<TutorEntity | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -69,6 +72,36 @@ export function TutoresListPage() {
 
   const handleTutorAdded = () => {
     tutorFacade.load(1, PAGE_SIZE, debouncedQuery);
+  };
+
+  const handleDeleteClick = (tutorId: number) => {
+    const tutor = tutores.find((t) => t.id === tutorId);
+    if (tutor) {
+      setTutorToDelete(tutor);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!tutorToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await tutorFacade.deleteTutor(tutorToDelete.id);
+      setTutorToDelete(null);
+
+      const remainingTutores = tutores.filter((t) => t.id !== tutorToDelete.id);
+      if (remainingTutores.length === 0 && pagination.page > 1) {
+        tutorFacade.load(pagination.page - 1, PAGE_SIZE, debouncedQuery);
+      }
+    } catch (error) {
+      console.error("Erro ao excluir tutor:", error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setTutorToDelete(null);
   };
 
   const hasNextPage = useMemo(() => {
@@ -121,9 +154,31 @@ export function TutoresListPage() {
 
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {tutores.map((tutor) => (
-            <TutorCard key={tutor.id} tutor={tutor} onClick={goToTutorDetail} />
+            <TutorCard
+              key={tutor.id}
+              tutor={tutor}
+              onClick={goToTutorDetail}
+              onDelete={handleDeleteClick}
+            />
           ))}
         </div>
+
+        <ActionModal
+          isOpen={!!tutorToDelete}
+          title="Excluir Tutor"
+          description="Esta ação não pode ser desfeita."
+          onClose={handleCancelDelete}
+          onConfirm={handleConfirmDelete}
+          confirmButtonLabel="Excluir"
+          cancelButtonLabel="Cancelar"
+          confirmButtonVariant="danger"
+          isLoading={isDeleting}
+        >
+          <p className="text-slate-700">
+            Tem certeza que deseja excluir o tutor{" "}
+            <strong>{tutorToDelete?.nome}</strong>?
+          </p>
+        </ActionModal>
 
         <Pagination
           currentPage={pagination.page}

@@ -8,4 +8,5 @@ export interface ListTutoresFilters {
 
 export interface ITutorRepository {
   list(filters: ListTutoresFilters): Promise<PaginatedTutoresEntity>;
+  delete(tutorId: number): Promise<void>;
 }
