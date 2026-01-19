@@ -179,16 +179,18 @@ export function PetsListPage() {
           </p>
         </ActionModal>
 
-        <Pagination
-          currentPage={pagination.page}
-          pageSize={pagination.pageSize}
-          total={pagination.total}
-          isLoading={loading}
-          hasNextPage={hasNextPage}
-          onPreviousPage={handlePrevPage}
-          onNextPage={handleNextPage}
-          onPageChange={handlePageChange}
-        />
+        {!isEmptyState && (
+          <Pagination
+            currentPage={pagination.page}
+            pageSize={pagination.pageSize}
+            total={pagination.total}
+            isLoading={loading}
+            hasNextPage={hasNextPage}
+            onPreviousPage={handlePrevPage}
+            onNextPage={handleNextPage}
+            onPageChange={handlePageChange}
+          />
+        )}
       </div>
     </div>
   );
