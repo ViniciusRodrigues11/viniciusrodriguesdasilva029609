@@ -5,7 +5,7 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({
-  imageSrc = "/public/doghouse.webp",
+  imageSrc = "/doghouse.webp",
   message,
   className = "",
 }: EmptyStateProps) {
