@@ -55,6 +55,14 @@ export function TutoresListPage() {
     tutorFacade.load(pagination.page + 1, PAGE_SIZE, debouncedQuery);
   };
 
+  const handlePageChange = (page: number) => {
+    const targetPage = Math.max(
+      1,
+      Math.min(page, Math.ceil((pagination.total ?? 0) / PAGE_SIZE) || page),
+    );
+    tutorFacade.load(targetPage, PAGE_SIZE, debouncedQuery);
+  };
+
   const goToTutorDetail = (tutorId: number) => {
     navigate(`/tutores/${tutorId}`);
   };
@@ -125,6 +133,7 @@ export function TutoresListPage() {
           hasNextPage={hasNextPage}
           onPreviousPage={handlePrevPage}
           onNextPage={handleNextPage}
+          onPageChange={handlePageChange}
         />
       </div>
     </div>

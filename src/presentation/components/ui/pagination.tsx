@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PaginationProps {
   currentPage: number;
@@ -6,9 +7,17 @@ interface PaginationProps {
   total: number | null;
   isLoading: boolean;
   hasNextPage: boolean;
+
+  scrollContainerRef?: React.RefObject<HTMLElement>;
+  scrollContainerSelector?: string;
+  bottomThresholdPx?: number;
+
   onPreviousPage: () => void;
   onNextPage: () => void;
+  onPageChange: (page: number) => void;
 }
+
+type PageItem = number | "…";
 
 export function Pagination({
   currentPage,
@@ -18,58 +27,126 @@ export function Pagination({
   hasNextPage,
   onPreviousPage,
   onNextPage,
+  onPageChange,
+  scrollContainerRef,
+  scrollContainerSelector = "main.overflow-y-auto",
+  bottomThresholdPx = 100,
 }: PaginationProps) {
-  const totalPages = total ? Math.ceil(total / pageSize) : null;
+  const totalPages =
+    total !== null ? Math.max(1, Math.ceil(total / pageSize)) : null;
+
+  const derivedHasNextPage =
+    totalPages !== null ? currentPage < totalPages : hasNextPage;
+
   const [isAtBottom, setIsAtBottom] = useState(false);
 
+  const pageNumbers: PageItem[] = useMemo(() => {
+    if (totalPages === null) return [];
+
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    const set = new Set<number>();
+    set.add(1);
+    set.add(totalPages);
+
+    const start = Math.max(2, currentPage - 1);
+    const end = Math.min(totalPages - 1, currentPage + 1);
+    for (let p = start; p <= end; p++) set.add(p);
+
+    const sorted = Array.from(set).sort((a, b) => a - b);
+
+    const out: PageItem[] = [];
+    for (let i = 0; i < sorted.length; i++) {
+      const p = sorted[i];
+      const prev = sorted[i - 1];
+
+      if (i > 0 && prev !== undefined && p - prev > 1) out.push("…");
+      out.push(p);
+    }
+
+    return out;
+  }, [currentPage, totalPages]);
+
   useEffect(() => {
-    const scrollContainer = document.querySelector("main.overflow-y-auto");
+    const scrollContainer =
+      scrollContainerRef?.current ??
+      (document.querySelector(scrollContainerSelector) as HTMLElement | null);
+
     if (!scrollContainer) return;
 
     const handleScroll = () => {
-      const scrollHeight = scrollContainer.scrollHeight;
-      const scrollTop = scrollContainer.scrollTop;
-      const clientHeight = scrollContainer.clientHeight;
+      const { scrollHeight, scrollTop, clientHeight } = scrollContainer;
       const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
-      const isBottom = distanceFromBottom < 100;
-
-      setIsAtBottom(isBottom);
+      setIsAtBottom(distanceFromBottom < bottomThresholdPx);
     };
 
     scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
 
     return () => scrollContainer.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [scrollContainerRef, scrollContainerSelector, bottomThresholdPx]);
 
   return (
     <div
       className={`flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 transition-all ${
         !isAtBottom
-          ? "fixed md:sticky bottom-4 left-1/2 z-40 md:max-w-md w-[90%] -translate-x-1/2 shadow-md"
-          : "relative shadow-sm w-full"
+          ? "fixed bottom-4 left-1/2 z-40 w-[90%] -translate-x-1/2 shadow-md md:sticky md:bottom-4 md:left-auto md:translate-x-0 md:max-w-md self-end"
+          : "relative w-full shadow-sm"
       }`}
     >
       <div className="text-sm text-slate-600">
-        Página {currentPage}
-        {totalPages ? ` de ${totalPages}` : null}
+        {currentPage}
+        {totalPages !== null ? ` de ${totalPages}` : null}
       </div>
-      <div className="flex gap-2">
+
+      <div className="flex items-center gap-1.5">
         <button
           type="button"
+          aria-label="Página anterior"
           onClick={onPreviousPage}
           disabled={currentPage <= 1 || isLoading}
           className="rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Anterior
+          <ChevronLeft className="inline-block h-4 w-4" />
         </button>
+
+        {pageNumbers.map((item, index) =>
+          typeof item === "number" ? (
+            <button
+              key={item}
+              type="button"
+              onClick={() => onPageChange(item)}
+              disabled={isLoading || item === currentPage}
+              aria-current={item === currentPage ? "page" : undefined}
+              className={`min-w-9 rounded-md border px-2.5 py-1.5 text-sm font-medium transition ${
+                item === currentPage
+                  ? "border-blue-500 bg-blue-50 text-blue-700"
+                  : "border-slate-200 text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              }`}
+            >
+              {item}
+            </button>
+          ) : (
+            <span
+              key={`ellipsis-${index}`}
+              aria-hidden="true"
+              className="px-1 text-slate-400"
+            >
+              {item}
+            </span>
+          ),
+        )}
+
         <button
           type="button"
+          aria-label="Próxima página"
           onClick={onNextPage}
-          disabled={!hasNextPage || isLoading}
+          disabled={!derivedHasNextPage || isLoading}
           className="rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Próximo
+          <ChevronRight className="inline-block h-4 w-4" />
         </button>
       </div>
     </div>

@@ -52,6 +52,14 @@ export function PetsListPage() {
     petFacade.load(pagination.page + 1, PAGE_SIZE, debouncedQuery);
   };
 
+  const handlePageChange = (page: number) => {
+    const targetPage = Math.max(
+      1,
+      Math.min(page, Math.ceil((pagination.total ?? 0) / PAGE_SIZE) || page),
+    );
+    petFacade.load(targetPage, PAGE_SIZE, debouncedQuery);
+  };
+
   const goToPetDetail = (petId: number) => {
     navigate(`/pets/${petId}`);
   };
@@ -122,6 +130,7 @@ export function PetsListPage() {
           hasNextPage={hasNextPage}
           onPreviousPage={handlePrevPage}
           onNextPage={handleNextPage}
+          onPageChange={handlePageChange}
         />
       </div>
     </div>
