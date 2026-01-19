@@ -44,10 +44,10 @@ export function Pagination({
 
   return (
     <div
-      className={`flex items-center justify-between gap-3 rounded-lg border border-gray-400 bg-slate-50 px-4 py-3 transition-all ${
+      className={`flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 transition-all ${
         !isAtBottom
-          ? "fixed md:sticky bottom-4 left-1/2 z-40 md:max-w-md w-[90%] -translate-x-1/2 shadow-2xl"
-          : "relative shadow-sm"
+          ? "fixed md:sticky bottom-4 left-1/2 z-40 md:max-w-md w-[90%] -translate-x-1/2 shadow-md"
+          : "relative shadow-sm w-full"
       }`}
     >
       <div className="text-sm text-slate-600">

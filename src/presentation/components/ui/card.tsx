@@ -94,7 +94,8 @@ export function Card({
 
   return (
     <div
-      className={`group relative flex h-80 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-md transition duration-300 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 ${className}`}
+      className={`group relative flex h-80 flex-col overflow-hidden rounded-lg border border-slate-300 bg-white shadow-sm
+         transition duration-300 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 ${className}`}
     >
       {/* Image Section */}
       <div
