@@ -31,24 +31,26 @@ export function TutorCard({
       title={tutor.nome}
       metadata={
         <div className="space-y-2 text-xs text-slate-600">
-          {tutor.email && (
-            <div className="flex items-center gap-2">
-              <Mail className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-              <span className="truncate">{tutor.email}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <Mail className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+            <span className="truncate">
+              {tutor.email || "Email não informado"}
+            </span>
+          </div>
 
           <div className="flex items-center gap-2">
             <Phone className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-            <span className="truncate">{tutor.telefone}</span>
+            <span className="truncate">
+              {tutor.telefone || "Telefone não informado"}
+            </span>
           </div>
 
-          {tutor.endereco && (
-            <div className="flex items-center gap-2">
-              <MapPin className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-              <span className="truncate">{tutor.endereco}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <MapPin className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+            <span className="truncate">
+              {tutor.endereco || "Endereço não informado"}
+            </span>
+          </div>
         </div>
       }
     />
