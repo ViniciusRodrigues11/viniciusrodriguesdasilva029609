@@ -77,7 +77,7 @@ describe("LoginPage", () => {
 
     // Assert
     await waitFor(() => {
-      expect(screen.getByText(/usuário é obrigatório/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/campo obrigatório/i)).toHaveLength(2);
     });
   });
 
@@ -97,7 +97,7 @@ describe("LoginPage", () => {
 
     // Assert
     await waitFor(() => {
-      expect(screen.getByText(/senha é obrigatório/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/campo obrigatório/i)).toHaveLength(2);
     });
   });
 
@@ -120,7 +120,7 @@ describe("LoginPage", () => {
     // Assert
     await waitFor(() => {
       expect(
-        screen.getByText(/senha deve ter no mínimo 3 caracteres/i),
+        screen.getByText(/deve ter no mínimo 5 caracteres/i),
       ).toBeInTheDocument();
     });
   });
