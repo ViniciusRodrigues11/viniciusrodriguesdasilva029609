@@ -4,7 +4,7 @@ import { LoginUseCase } from '../use-cases/login.use-case';
 import { RefreshTokenUseCase } from '../use-cases/refresh-token.use-case';
 import type { IAuthRepository } from '../../domain/repositories/auth.repository';
 import { TokenStorage } from '../../infrastructure/storage/token.storage';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 
 describe('AuthFacade', () => {
   let facade: AuthFacade;
@@ -25,6 +25,7 @@ describe('AuthFacade', () => {
       getRefreshToken: vi.fn().mockReturnValue(null),
       getExpiresIn: vi.fn().mockReturnValue(null),
       getRefreshExpiresIn: vi.fn().mockReturnValue(null),
+      getAccessExpiresAt: vi.fn().mockReturnValue(null),
       clearTokens: vi.fn().mockImplementation(() => { }),
       hasTokens: vi.fn().mockReturnValue(false),
     } as unknown as TokenStorage;
@@ -79,37 +80,119 @@ describe('AuthFacade', () => {
     });
   });
 
-  describe('authState', () => {
-    it('deve emitir estado inicial correto', async () => {
+  describe('login', () => {
+    it('deve autenticar quando login for bem sucedido', async () => {
+      // Arrange
+      const credentials = { username: 'user', password: 'pass' };
+      vi.spyOn(mockLoginUseCase, 'execute').mockReturnValue(
+        of(
+          { isLoading: true, error: null },
+          { isLoading: false, error: null }
+        )
+      );
+
       // Act
-      const state = await firstValueFrom(facade.authState);
+      facade.login(credentials);
 
       // Assert
-      expect(state).toEqual({
-        isAuthenticated: false,
-        isLoading: false,
-        error: null,
+      expect(mockLoginUseCase.execute).toHaveBeenCalledWith(credentials);
+      await vi.waitFor(async () => {
+        const authState = await firstValueFrom(facade.authState);
+        expect(authState.isAuthenticated).toBe(true);
+        expect(authState.isLoading).toBe(false);
+        expect(authState.error).toBeNull();
+      });
+      expect(mockTokenStorage.getAccessExpiresAt).toHaveBeenCalled();
+    });
+
+    it('deve manter não autenticado quando ocorrer erro', async () => {
+      // Arrange
+      const credentials = { username: 'user', password: 'wrong' };
+      vi.spyOn(mockLoginUseCase, 'execute').mockReturnValue(
+        of(
+          { isLoading: true, error: null },
+          { isLoading: false, error: 'Usuário ou senha incorretos' }
+        )
+      );
+
+      // Act
+      facade.login(credentials);
+
+      // Assert
+      await vi.waitFor(async () => {
+        const authState = await firstValueFrom(facade.authState);
+        expect(authState.isAuthenticated).toBe(false);
+        expect(authState.isLoading).toBe(false);
+        expect(authState.error).toBe('Usuário ou senha incorretos');
+      });
+      expect(mockTokenStorage.getAccessExpiresAt).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('refreshToken', () => {
+    it('deve retornar erro quando refresh token não existir', async () => {
+      // Arrange
+      vi.spyOn(mockTokenStorage, 'getRefreshToken').mockReturnValue(null);
+
+      // Act
+      facade.refreshToken();
+
+      // Assert
+      await vi.waitFor(async () => {
+        const authState = await firstValueFrom(facade.authState);
+        expect(authState.isAuthenticated).toBe(false);
+        expect(authState.error).toBe('Token de refresh não encontrado');
       });
     });
-  });
 
-  describe('error$', () => {
-    it('deve emitir null inicialmente', async () => {
+    it('deve solicitar refresh token e agendar renovação', async () => {
+      // Arrange
+      vi.spyOn(mockTokenStorage, 'getRefreshToken').mockReturnValue('refresh-token');
+      vi.spyOn(mockRefreshTokenUseCase, 'execute').mockReturnValue(
+        of(
+          { data: null, isLoading: true, error: null },
+          {
+            data: {
+              access_token: 'access',
+              refresh_token: 'refresh',
+              expires_in: 3600,
+              refresh_expires_in: 7200,
+            },
+            isLoading: false,
+            error: null,
+          }
+        )
+      );
+
       // Act
-      const error = await firstValueFrom(facade.error$);
+      facade.refreshToken();
 
       // Assert
-      expect(error).toBeNull();
+      expect(mockRefreshTokenUseCase.execute).toHaveBeenCalledWith('refresh-token');
+      await vi.waitFor(async () => {
+        const authState = await firstValueFrom(facade.authState);
+        expect(authState.error).toBeNull();
+      });
+      expect(mockTokenStorage.getAccessExpiresAt).toHaveBeenCalled();
+      expect(mockTokenStorage.clearTokens).not.toHaveBeenCalled();
     });
-  });
 
-  describe('isLoading$', () => {
-    it('deve emitir false inicialmente', async () => {
+    it('deve fazer logout quando refresh token falhar', async () => {
+      // Arrange
+      vi.spyOn(mockTokenStorage, 'getRefreshToken').mockReturnValue('refresh-token');
+      vi.spyOn(mockRefreshTokenUseCase, 'execute').mockReturnValue(
+        of({ data: null, isLoading: false, error: 'Erro ao renovar token' })
+      );
+
       // Act
-      const isLoading = await firstValueFrom(facade.isLoading$);
+      facade.refreshToken();
 
       // Assert
-      expect(isLoading).toBe(false);
+      await vi.waitFor(async () => {
+        const authState = await firstValueFrom(facade.authState);
+        expect(authState.isAuthenticated).toBe(false);
+      });
+      expect(mockTokenStorage.clearTokens).toHaveBeenCalled();
     });
   });
 });

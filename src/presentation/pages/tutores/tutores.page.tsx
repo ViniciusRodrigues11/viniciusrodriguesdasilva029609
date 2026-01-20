@@ -1,7 +1,0 @@
-import { TutoresListPage } from "./tutores-list.page";
-
-export function TutoresModule() {
-  return <TutoresListPage />;
-}
-
-export default TutoresModule;
