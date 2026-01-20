@@ -1,6 +1,6 @@
 // Dependencies
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useObservable } from "../../hooks/use-observable.hook";
 import { FormInput } from "../../components/ui/form-input";
 import { authFacade } from "../../../services/auth.service";
@@ -31,7 +31,6 @@ const validate = (data: LoginForm) => {
 };
 
 export function LoginPage() {
-  const navigate = useNavigate();
   const isLoading = useObservable(authFacade.isLoading$, false);
   const error = useObservable(authFacade.error$, null);
   const isAuthenticated = useObservable(
@@ -49,7 +48,7 @@ export function LoginPage() {
   };
 
   if (isAuthenticated) {
-    navigate("/pets", { replace: true });
+    return <Navigate to="/pets" replace />;
   }
 
   const handleInputChange = <K extends keyof LoginForm>(
