@@ -168,6 +168,8 @@ export function TutoresListPage() {
           description="Esta ação não pode ser desfeita."
           onClose={handleCancelDelete}
           onConfirm={handleConfirmDelete}
+          size="sm"
+          fitContent
           confirmButtonLabel="Excluir"
           cancelButtonLabel="Cancelar"
           confirmButtonVariant="danger"

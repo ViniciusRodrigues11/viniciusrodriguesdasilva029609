@@ -13,6 +13,7 @@ interface ActionModalProps {
   cancelButtonLabel?: string;
   confirmButtonVariant?: "primary" | "danger";
   isLoading?: boolean;
+  fitContent?: boolean;
 }
 
 export function ActionModal({
@@ -27,6 +28,7 @@ export function ActionModal({
   cancelButtonLabel = "Cancelar",
   confirmButtonVariant = "primary",
   isLoading = false,
+  fitContent = false,
 }: ActionModalProps) {
   const [loading, setLoading] = useState(false);
 
@@ -83,6 +85,7 @@ export function ActionModal({
       description={description}
       onClose={onClose}
       size={size}
+      fitContent={fitContent}
       isDismissible={!isDisabled}
       footer={footer}
     >

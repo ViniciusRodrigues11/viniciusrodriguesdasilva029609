@@ -11,6 +11,7 @@ interface ModalProps {
   size?: "sm" | "md" | "lg";
   closeButtonLabel?: string;
   isDismissible?: boolean;
+  fitContent?: boolean;
 }
 
 export function Modal({
@@ -21,6 +22,7 @@ export function Modal({
   children,
   footer,
   isDismissible = true,
+  fitContent = false,
 }: ModalProps) {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -42,6 +44,10 @@ export function Modal({
 
   if (!isOpen) return null;
 
+  const heightClass = fitContent
+    ? "h-auto max-h-[90vh]"
+    : "h-screen md:h-150 md:max-h-[90vh]";
+
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (isDismissible && e.target === e.currentTarget) {
       onClose();
@@ -57,7 +63,7 @@ export function Modal({
       />
 
       <div
-        className={`relative md:w-100 md:h-150 h-screen w-full rounded-lg bg-white shadow-xl md:max-h-[90vh] flex flex-col`}
+        className={`relative md:w-100 w-full rounded-lg bg-white shadow-xl flex flex-col ${heightClass}`}
       >
         {/* Header */}
         <div className="flex items-start justify-between border-b border-slate-200 px-6 py-4 shrink-0">
