@@ -53,6 +53,8 @@ function PetUpsertModal({
   const [formData, setFormData] = useState<PetForm>(emptyForm());
   const [errors, setErrors] = useState<PetErrors>(emptyErrors());
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isRemovingPhoto, setIsRemovingPhoto] = useState(false);
+  const [removedExistingPhoto, setRemovedExistingPhoto] = useState(false);
 
   const isEdit = mode === "edit";
 
@@ -61,6 +63,8 @@ function PetUpsertModal({
       setFormData(emptyForm());
       setErrors(emptyErrors());
       setImageFile(null);
+      setIsRemovingPhoto(false);
+      setRemovedExistingPhoto(false);
       return;
     }
 
@@ -78,6 +82,8 @@ function PetUpsertModal({
     }
     setErrors(emptyErrors());
     setImageFile(null);
+    setIsRemovingPhoto(false);
+    setRemovedExistingPhoto(false);
   }, [isOpen, isEdit, pet]);
 
   const validateForm = (): boolean => {
@@ -136,6 +142,22 @@ function PetUpsertModal({
 
   const handleClose = () => {
     onOpenChange(false);
+  };
+
+  const handleRemoveExistingPhoto = async () => {
+    if (!isEdit || !pet?.foto?.id || !pet?.id) return;
+
+    try {
+      setIsRemovingPhoto(true);
+      await petFacade.deleteFoto(pet.id, pet.foto.id);
+      setRemovedExistingPhoto(true);
+      setImageFile(null);
+    } catch (removeError) {
+      console.error("Erro ao remover foto do pet:", removeError);
+      throw removeError;
+    } finally {
+      setIsRemovingPhoto(false);
+    }
   };
 
   const { modalTitle, confirmLabel, modalDescription } = useMemo(() => {
@@ -202,7 +224,17 @@ function PetUpsertModal({
           placeholder="Ex: 3, 5"
         />
 
-        <ImageDragArea onImageSelect={setImageFile} />
+        <ImageDragArea
+          key={`${isEdit ? (pet?.id ?? "new") : "create"}-${pet?.foto?.id ?? "nofoto"}-${isOpen ? "open" : "closed"}`}
+          onImageSelect={setImageFile}
+          currentImageUrl={
+            isEdit && pet?.foto?.url && !removedExistingPhoto
+              ? pet.foto.url
+              : undefined
+          }
+          onRemoveExisting={handleRemoveExistingPhoto}
+          isRemoving={isRemovingPhoto}
+        />
       </form>
     </ActionModal>
   );

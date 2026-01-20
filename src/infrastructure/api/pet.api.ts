@@ -72,4 +72,8 @@ export class PetApi {
 
     return response.data;
   }
+
+  async deleteFoto(petId: number, fotoId: number): Promise<void> {
+    await this.httpClient.delete(`/v1/pets/${petId}/fotos/${fotoId}`);
+  }
 }

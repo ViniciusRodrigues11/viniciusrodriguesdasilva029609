@@ -4,43 +4,45 @@ interface ImageDragAreaProps {
   onImageSelect: (file: File) => void;
   error?: string;
   currentImageUrl?: string;
+  onRemoveExisting?: () => Promise<void> | void;
+  isRemoving?: boolean;
 }
 
 export function ImageDragArea({
   onImageSelect,
   error,
   currentImageUrl,
+  onRemoveExisting,
+  isRemoving = false,
 }: ImageDragAreaProps) {
   const [isDragging, setIsDragging] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(
-    currentImageUrl || null,
-  );
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
+  const [removedExisting, setRemovedExisting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const previewUrl =
+    localPreviewUrl ?? (!removedExisting ? (currentImageUrl ?? null) : null);
+  const isExistingPreview =
+    !localPreviewUrl && !!currentImageUrl && !removedExisting;
 
   const validateAndProcessFile = useCallback(
     (file: File) => {
-      // Valida se é uma imagem
       if (!file.type.startsWith("image/")) {
         alert("Por favor, selecione apenas arquivos de imagem");
         return;
       }
-
-      // Valida tamanho (max 5MB)
       const maxSize = 5 * 1024 * 1024; // 5MB
       if (file.size > maxSize) {
         alert("A imagem deve ter no máximo 5MB");
         return;
       }
-
-      // Cria preview
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreviewUrl(reader.result as string);
+        setLocalPreviewUrl(reader.result as string);
       };
       reader.readAsDataURL(file);
-
-      // Notifica o componente pai
       onImageSelect(file);
+      setRemovedExisting(false);
     },
     [onImageSelect],
   );
@@ -78,9 +80,21 @@ export function ImageDragArea({
     }
   };
 
-  const handleRemoveImage = (e: React.MouseEvent) => {
+  const handleRemoveImage = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    setPreviewUrl(null);
+
+    if (isExistingPreview && onRemoveExisting) {
+      try {
+        await onRemoveExisting();
+        setRemovedExisting(true);
+        setLocalPreviewUrl(null);
+      } catch (removeError) {
+        console.error("Erro ao remover imagem:", removeError);
+        return;
+      }
+    }
+
+    setLocalPreviewUrl(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -122,7 +136,8 @@ export function ImageDragArea({
             <button
               type="button"
               onClick={handleRemoveImage}
-              className="absolute top-0 right-0 -mt-2 -mr-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+              disabled={isRemoving}
+              className="absolute top-0 right-0 -mt-2 -mr-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               aria-label="Remover imagem"
             >
               <svg

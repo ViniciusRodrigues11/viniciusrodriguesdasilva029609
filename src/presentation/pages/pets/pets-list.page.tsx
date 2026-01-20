@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PetCard } from "../../components/pets/pet-card";
-import { AddPetModal, PetUpsertModal } from "../../components/pets/add-pet-modal";
+import {
+  AddPetModal,
+  PetUpsertModal,
+} from "../../components/pets/add-pet-modal";
 import { Pagination } from "../../components/ui/pagination";
 import { SearchInput } from "../../components/ui/search-input";
 import { EmptyState } from "../../components/ui/empty-state";
