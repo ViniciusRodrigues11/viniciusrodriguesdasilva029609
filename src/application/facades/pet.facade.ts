@@ -107,6 +107,20 @@ export class PetFacade {
     }
   }
 
+  async uploadFoto(petId: number, foto: File): Promise<void> {
+    this.loadingSubject.next(true);
+    this.errorSubject.next(null);
+
+    try {
+      await this.petApi.uploadFoto(petId, foto);
+    } catch (error: unknown) {
+      this.errorSubject.next(this.extractErrorMessage(error));
+      throw error;
+    } finally {
+      this.loadingSubject.next(false);
+    }
+  }
+
   private extractErrorMessage(error: unknown): string {
     if (error && typeof error === 'object' && 'response' in error) {
       const httpError = error as { response?: { status?: number; data?: { message?: string } } };

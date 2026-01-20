@@ -52,4 +52,17 @@ export class PetApi {
   async deletePet(petId: number): Promise<void> {
     await this.httpClient.delete(`/v1/pets/${petId}`);
   }
+
+  async uploadFoto(petId: number, foto: File): Promise<{ id: number; nome?: string; contentType?: string; url?: string }> {
+    const formData = new FormData();
+    formData.append('foto', foto);
+
+    const response = await this.httpClient.post(`/v1/pets/${petId}/fotos`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return response.data;
+  }
 }

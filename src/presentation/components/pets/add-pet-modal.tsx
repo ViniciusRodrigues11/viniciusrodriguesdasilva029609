@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ActionModal } from "../action-modal/action-modal";
 import { AddButton } from "../ui/add-button";
 import { FormInput } from "../ui/form-input";
+import { ImageDragArea } from "../DragArea";
 import { validators } from "../../../helpers/validatorsHelper";
 import { petFacade } from "../../../services/pet.service";
 
@@ -37,6 +38,7 @@ export function AddPetModal({ onPetAdded }: AddPetModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState<PetForm>(emptyForm());
   const [errors, setErrors] = useState<PetErrors>(emptyErrors());
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const validateForm = (): boolean => {
     const { ok, errors: newErrors } = validate(formData);
@@ -47,6 +49,7 @@ export function AddPetModal({ onPetAdded }: AddPetModalProps) {
   const resetState = () => {
     setFormData(emptyForm());
     setErrors(emptyErrors());
+    setImageFile(null);
   };
 
   const handleAddPet = async () => {
@@ -55,11 +58,16 @@ export function AddPetModal({ onPetAdded }: AddPetModalProps) {
     }
 
     try {
-      await petFacade.addPet({
+      const createdPet = await petFacade.addPet({
         nome: formData.nome.trim(),
         raca: formData.raca.trim(),
         idade: Number(formData.idade),
       });
+
+      // Se houver imagem, faz upload em paralelo
+      if (imageFile && createdPet.id) {
+        await petFacade.uploadFoto(createdPet.id, imageFile);
+      }
 
       resetState();
       onPetAdded?.();
@@ -133,6 +141,8 @@ export function AddPetModal({ onPetAdded }: AddPetModalProps) {
             required
             placeholder="Ex: 3, 5"
           />
+
+          <ImageDragArea onImageSelect={setImageFile} />
         </form>
       </ActionModal>
     </>

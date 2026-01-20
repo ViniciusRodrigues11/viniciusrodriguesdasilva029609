@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ActionModal } from "../action-modal/action-modal";
 import { AddButton } from "../ui/add-button";
 import { FormInput } from "../ui/form-input";
+import { ImageDragArea } from "../DragArea";
 import { tutorFacade } from "../../../services/tutor.service";
 import { applyPhoneMask, applyCpfMask } from "../../../helpers/maskHelpers";
 import { createValidator, validators } from "../../../helpers/validatorsHelper";
@@ -61,6 +62,7 @@ export function AddTutorModal({ onTutorAdded }: AddTutorModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState<TutorForm>(emptyForm());
   const [errors, setErrors] = useState<TutorErrors>(emptyErrors());
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const validateForm = (): boolean => {
     const { ok, errors: newErrors } = validate(formData);
@@ -71,6 +73,7 @@ export function AddTutorModal({ onTutorAdded }: AddTutorModalProps) {
   const resetState = () => {
     setFormData(emptyForm());
     setErrors(emptyErrors());
+    setImageFile(null);
   };
 
   const handleAddTutor = async () => {
@@ -79,13 +82,18 @@ export function AddTutorModal({ onTutorAdded }: AddTutorModalProps) {
     }
 
     try {
-      await tutorFacade.addTutor({
+      const createdTutor = await tutorFacade.addTutor({
         nome: formData.nome.trim(),
         email: formData.email.trim(),
         telefone: onlyDigits(formData.telefone),
         endereco: formData.endereco.trim(),
         cpf: Number(onlyDigits(formData.cpf)),
       });
+
+      // Se houver imagem, faz upload em paralelo
+      if (imageFile && createdTutor.id) {
+        await tutorFacade.uploadFoto(createdTutor.id, imageFile);
+      }
 
       resetState();
       onTutorAdded?.();
@@ -188,6 +196,8 @@ export function AddTutorModal({ onTutorAdded }: AddTutorModalProps) {
             required
             placeholder="Ex: Rua das Flores, 123, Bairro Centro, São Paulo - SP"
           />
+
+          <ImageDragArea onImageSelect={setImageFile} />
         </form>
       </ActionModal>
     </>

@@ -56,4 +56,17 @@ export class TutorApi {
   async deleteTutor(tutorId: number): Promise<void> {
     await this.httpClient.delete(`/v1/tutores/${tutorId}`);
   }
+
+  async uploadFoto(tutorId: number, foto: File): Promise<{ id: number; nome?: string; contentType?: string; url?: string }> {
+    const formData = new FormData();
+    formData.append('foto', foto);
+
+    const response = await this.httpClient.post(`/v1/tutores/${tutorId}/fotos`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return response.data;
+  }
 }

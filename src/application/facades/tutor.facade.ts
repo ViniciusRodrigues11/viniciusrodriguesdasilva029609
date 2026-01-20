@@ -106,6 +106,20 @@ export class TutorFacade {
     }
   }
 
+  async uploadFoto(tutorId: number, foto: File): Promise<void> {
+    this.loadingSubject.next(true);
+    this.errorSubject.next(null);
+
+    try {
+      await this.tutorApi.uploadFoto(tutorId, foto);
+    } catch (error) {
+      this.errorSubject.next(this.extractErrorMessage(error));
+      throw error;
+    } finally {
+      this.loadingSubject.next(false);
+    }
+  }
+
   reset(): void {
     this.tutoresSubject.next([]);
     this.loadingSubject.next(false);
