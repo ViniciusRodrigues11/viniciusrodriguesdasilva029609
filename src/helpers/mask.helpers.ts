@@ -1,6 +1,3 @@
-// Helper function to apply masks
-
-// Função para aplicar máscara de telefone
 export const applyPhoneMask = (value: string): string => {
   const cleaned = value.replace(/\D/g, "");
   if (cleaned.length <= 10) {
@@ -13,7 +10,6 @@ export const applyPhoneMask = (value: string): string => {
     .replace(/(\d{5})(\d)/, "$1-$2");
 };
 
-// Função para aplicar máscara de CPF
 export const applyCpfMask = (value: string): string => {
   const cleaned = value.replace(/\D/g, "");
   return cleaned
