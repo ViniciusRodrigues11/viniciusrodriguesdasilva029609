@@ -1,7 +1,7 @@
 import { BehaviorSubject, type Observable } from 'rxjs';
 import type { PetEntity } from '../../domain/entities/pet.entity';
 import type { ListPetsUseCase } from '../use-cases/list-pets.use-case';
-import type { PetApi, CreatePetApiPayload } from '../../infrastructure/api/pet.api';
+import type { PetApi, CreatePetApiPayload, PetApiResponse, UpdatePetApiPayload } from '../../infrastructure/api/pet.api';
 
 export interface PetPaginationState {
   page: number;
@@ -70,7 +70,38 @@ export class PetFacade {
 
     try {
       const createdPet = await this.petApi.createPet(petData);
-      return createdPet as unknown as PetEntity;
+      const petEntity = this.mapApiPetToEntity(createdPet);
+
+      return petEntity;
+    } catch (error: unknown) {
+      this.errorSubject.next(this.extractErrorMessage(error));
+      throw error;
+    } finally {
+      this.loadingSubject.next(false);
+    }
+  }
+
+  async updatePet(petId: number, petData: UpdatePetApiPayload): Promise<PetEntity> {
+    this.loadingSubject.next(true);
+    this.errorSubject.next(null);
+
+    try {
+      const updatedPet = await this.petApi.updatePet(petId, petData);
+      const petEntity = this.mapApiPetToEntity(updatedPet);
+
+      const currentPets = this.petsSubject.getValue();
+      const petIndex = currentPets.findIndex((pet) => pet.id === petId);
+
+      if (petIndex >= 0) {
+        const updatedPets = [...currentPets];
+        updatedPets[petIndex] = {
+          ...updatedPets[petIndex],
+          ...petEntity,
+        };
+        this.petsSubject.next(updatedPets);
+      }
+
+      return petEntity;
     } catch (error: unknown) {
       this.errorSubject.next(this.extractErrorMessage(error));
       throw error;
@@ -134,5 +165,22 @@ export class PetFacade {
       return error.message || 'Erro ao processar solicitação.';
     }
     return 'Erro ao processar solicitação.';
+  }
+
+  private mapApiPetToEntity(apiPet: PetApiResponse): PetEntity {
+    return {
+      id: apiPet.id,
+      nome: apiPet.nome,
+      raca: apiPet.raca,
+      idade: apiPet.idade,
+      foto: apiPet.foto
+        ? {
+          id: apiPet.foto.id,
+          nome: apiPet.foto.nome,
+          contentType: apiPet.foto.contentType,
+          url: apiPet.foto.url,
+        }
+        : undefined,
+    };
   }
 }

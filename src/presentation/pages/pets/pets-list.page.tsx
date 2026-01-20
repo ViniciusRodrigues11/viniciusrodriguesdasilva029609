@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PetCard } from "../../components/pets/pet-card";
-import { AddPetModal } from "../../components/pets/add-pet-modal";
+import { AddPetModal, PetUpsertModal } from "../../components/pets/add-pet-modal";
 import { Pagination } from "../../components/ui/pagination";
 import { SearchInput } from "../../components/ui/search-input";
 import { EmptyState } from "../../components/ui/empty-state";
@@ -31,6 +31,7 @@ export function PetsListPage() {
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [petToDelete, setPetToDelete] = useState<PetEntity | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [petToEdit, setPetToEdit] = useState<PetEntity | null>(null);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -79,6 +80,13 @@ export function PetsListPage() {
     }
   };
 
+  const handleEditClick = (petId: number) => {
+    const pet = pets.find((p) => p.id === petId);
+    if (pet) {
+      setPetToEdit(pet);
+    }
+  };
+
   const handleConfirmDelete = async () => {
     if (!petToDelete) return;
 
@@ -102,6 +110,11 @@ export function PetsListPage() {
 
   const handleCancelDelete = () => {
     setPetToDelete(null);
+  };
+
+  const handlePetUpdated = () => {
+    setPetToEdit(null);
+    petFacade.load(pagination.page, PAGE_SIZE, debouncedQuery);
   };
 
   const hasNextPage = useMemo(() => {
@@ -154,10 +167,23 @@ export function PetsListPage() {
               key={pet.id}
               pet={pet}
               onClick={goToPetDetail}
+              onEdit={handleEditClick}
               onDelete={handleDeleteClick}
             />
           ))}
         </div>
+
+        <PetUpsertModal
+          mode="edit"
+          pet={petToEdit}
+          isOpen={!!petToEdit}
+          onOpenChange={(open) => {
+            if (!open) {
+              setPetToEdit(null);
+            }
+          }}
+          onSuccess={handlePetUpdated}
+        />
 
         <ActionModal
           isOpen={!!petToDelete}

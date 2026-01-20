@@ -33,6 +33,8 @@ export interface CreatePetApiPayload {
   idade: number;
 }
 
+export type UpdatePetApiPayload = CreatePetApiPayload;
+
 export class PetApi {
   constructor(private readonly httpClient: AxiosInstance) { }
 
@@ -46,6 +48,11 @@ export class PetApi {
 
   async createPet(payload: CreatePetApiPayload): Promise<PetApiResponse> {
     const response = await this.httpClient.post<PetApiResponse>('/v1/pets', payload);
+    return response.data;
+  }
+
+  async updatePet(petId: number, payload: UpdatePetApiPayload): Promise<PetApiResponse> {
+    const response = await this.httpClient.put<PetApiResponse>(`/v1/pets/${petId}`, payload);
     return response.data;
   }
 
