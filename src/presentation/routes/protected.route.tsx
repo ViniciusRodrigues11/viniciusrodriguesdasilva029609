@@ -17,8 +17,6 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     authFacade.isAuthenticatedSync(),
   );
 
-  console.log("ProtectedRoute - isAuthenticated:", isAuthenticated);
-
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
