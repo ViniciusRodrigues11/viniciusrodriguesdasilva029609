@@ -13,6 +13,23 @@ export interface PetApiResponse {
   };
 }
 
+export interface PetDetailApiResponse extends PetApiResponse {
+  tutores?: Array<{
+    id: number;
+    nome: string;
+    email?: string;
+    telefone: string;
+    endereco?: string;
+    cpf?: number;
+    foto?: {
+      id: number;
+      nome?: string;
+      contentType?: string;
+      url?: string;
+    };
+  }>;
+}
+
 export interface PaginatedPetsApiResponse {
   content: PetApiResponse[];
   page: number;
@@ -58,6 +75,11 @@ export class PetApi {
 
   async deletePet(petId: number): Promise<void> {
     await this.httpClient.delete(`/v1/pets/${petId}`);
+  }
+
+  async getPetDetail(petId: number): Promise<PetDetailApiResponse> {
+    const response = await this.httpClient.get<PetDetailApiResponse>(`/v1/pets/${petId}`);
+    return response.data;
   }
 
   async uploadFoto(petId: number, foto: File): Promise<{ id: number; nome?: string; contentType?: string; url?: string }> {

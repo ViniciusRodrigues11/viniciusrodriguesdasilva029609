@@ -51,7 +51,7 @@ export function ActionModal({
   };
 
   const footer = (
-    <div className="flex gap-3 px-6 py-4 bg-gradient-to-t from-white via-white to-white/80 border-t border-slate-200">
+    <div className="flex gap-3 px-6 py-4 bg-linear-to-t from-white via-white to-white/80 border-t border-slate-200">
       <button
         type="button"
         onClick={onClose}
