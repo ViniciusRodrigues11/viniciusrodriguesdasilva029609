@@ -106,4 +106,12 @@ export class TutorApi {
   async deleteFoto(tutorId: number, fotoId: number): Promise<void> {
     await this.httpClient.delete(`/v1/tutores/${tutorId}/fotos/${fotoId}`);
   }
+
+  async linkPet(tutorId: number, petId: number): Promise<void> {
+    await this.httpClient.post(`/v1/tutores/${tutorId}/pets/${petId}`);
+  }
+
+  async unlinkPet(tutorId: number, petId: number): Promise<void> {
+    await this.httpClient.delete(`/v1/tutores/${tutorId}/pets/${petId}`);
+  }
 }

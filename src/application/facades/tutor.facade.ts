@@ -2,7 +2,7 @@ import { BehaviorSubject, type Observable } from 'rxjs';
 import type { TutorEntity } from '../../domain/entities/tutor.entity';
 import type { ListTutoresUseCase } from '../use-cases/list-tutores.use-case';
 import type { DeleteTutorUseCase } from '../use-cases/delete-tutor.use-case';
-import type { TutorApi, CreateTutorApiPayload, UpdateTutorApiPayload, TutorDetailApiResponse } from '../../infrastructure/api/tutor.api';
+import type { TutorApi, CreateTutorApiPayload, UpdateTutorApiPayload } from '../../infrastructure/api/tutor.api';
 
 export interface TutorPaginationState {
   page: number;
@@ -194,6 +194,55 @@ export class TutorFacade {
   clearTutorDetail(): void {
     this.tutorDetailSubject.next(null);
     this.errorSubject.next(null);
+  }
+
+  async linkPet(tutorId: number, petId: number): Promise<void> {
+    this.loadingSubject.next(true);
+    this.errorSubject.next(null);
+
+    try {
+      await this.tutorApi.linkPet(tutorId, petId);
+      // Recarrega os detalhes do tutor para atualizar a lista de pets
+      await this.loadTutorDetail(tutorId);
+    } catch (error) {
+      this.errorSubject.next(this.extractErrorMessage(error));
+      throw error;
+    } finally {
+      this.loadingSubject.next(false);
+    }
+  }
+
+  async linkPets(tutorId: number, petIds: number[]): Promise<void> {
+    if (!petIds.length) return;
+
+    this.loadingSubject.next(true);
+    this.errorSubject.next(null);
+
+    try {
+      await Promise.all(petIds.map((petId) => this.tutorApi.linkPet(tutorId, petId)));
+      await this.loadTutorDetail(tutorId);
+    } catch (error) {
+      this.errorSubject.next(this.extractErrorMessage(error));
+      throw error;
+    } finally {
+      this.loadingSubject.next(false);
+    }
+  }
+
+  async unlinkPet(tutorId: number, petId: number): Promise<void> {
+    this.loadingSubject.next(true);
+    this.errorSubject.next(null);
+
+    try {
+      await this.tutorApi.unlinkPet(tutorId, petId);
+      // Recarrega os detalhes do tutor para atualizar a lista de pets
+      await this.loadTutorDetail(tutorId);
+    } catch (error) {
+      this.errorSubject.next(this.extractErrorMessage(error));
+      throw error;
+    } finally {
+      this.loadingSubject.next(false);
+    }
   }
 
   reset(): void {
