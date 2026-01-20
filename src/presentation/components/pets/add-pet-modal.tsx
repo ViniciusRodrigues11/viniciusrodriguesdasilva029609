@@ -3,7 +3,7 @@ import { ActionModal } from "../action-modal/action-modal";
 import { AddButton } from "../ui/add-button";
 import { FormInput } from "../ui/form-input";
 import { ImageDragArea } from "../DragArea";
-import { validators } from "../../../helpers/validatorsHelper";
+import { validators } from "../../../helpers/validators.helper";
 import type { PetEntity } from "../../../domain/entities/pet.entity";
 import { petFacade } from "../../../services/pet.service";
 

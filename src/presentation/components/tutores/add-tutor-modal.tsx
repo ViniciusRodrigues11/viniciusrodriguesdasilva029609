@@ -5,7 +5,10 @@ import { FormInput } from "../ui/form-input";
 import { ImageDragArea } from "../DragArea";
 import { tutorFacade } from "../../../services/tutor.service";
 import { applyPhoneMask, applyCpfMask } from "../../../helpers/mask.helpers";
-import { createValidator, validators } from "../../../helpers/validatorsHelper";
+import {
+  createValidator,
+  validators,
+} from "../../../helpers/validators.helper";
 import type { TutorEntity } from "../../../domain/entities/tutor.entity";
 
 // Types

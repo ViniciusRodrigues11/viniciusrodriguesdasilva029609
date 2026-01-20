@@ -4,7 +4,7 @@ import { Navigate } from "react-router-dom";
 import { useObservable } from "../../hooks/use-observable.hook";
 import { FormInput } from "../../components/ui/form-input";
 import { authFacade } from "../../../services/auth.service";
-import { validators } from "../../../helpers/validatorsHelper";
+import { validators } from "../../../helpers/validators.helper";
 
 // Types
 import type { CredentialsEntity } from "../../../domain/entities/auth.entity";
