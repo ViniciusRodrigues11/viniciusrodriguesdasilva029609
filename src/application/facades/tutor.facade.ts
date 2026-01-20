@@ -2,12 +2,27 @@ import { BehaviorSubject, type Observable } from 'rxjs';
 import type { TutorEntity } from '../../domain/entities/tutor.entity';
 import type { ListTutoresUseCase } from '../use-cases/list-tutores.use-case';
 import type { DeleteTutorUseCase } from '../use-cases/delete-tutor.use-case';
-import type { TutorApi, CreateTutorApiPayload, UpdateTutorApiPayload } from '../../infrastructure/api/tutor.api';
+import type { TutorApi, CreateTutorApiPayload, UpdateTutorApiPayload, TutorDetailApiResponse } from '../../infrastructure/api/tutor.api';
 
 export interface TutorPaginationState {
   page: number;
   pageSize: number;
   total: number | null;
+}
+
+export interface TutorDetail extends TutorEntity {
+  pets?: Array<{
+    id: number;
+    nome: string;
+    raca?: string;
+    idade?: number;
+    foto?: {
+      id: number;
+      nome?: string;
+      contentType?: string;
+      url?: string;
+    };
+  }>;
 }
 
 export class TutorFacade {
@@ -19,6 +34,8 @@ export class TutorFacade {
     pageSize: 9,
     total: null,
   });
+  private readonly tutorDetailSubject = new BehaviorSubject<TutorDetail | null>(null);
+  private readonly detailLoadingSubject = new BehaviorSubject<boolean>(false);
 
   constructor(
     private readonly listTutoresUseCase: ListTutoresUseCase,
@@ -40,6 +57,14 @@ export class TutorFacade {
 
   get pagination$(): Observable<TutorPaginationState> {
     return this.paginationSubject.asObservable();
+  }
+
+  get tutorDetail$(): Observable<TutorDetail | null> {
+    return this.tutorDetailSubject.asObservable();
+  }
+
+  get detailLoading$(): Observable<boolean> {
+    return this.detailLoadingSubject.asObservable();
   }
 
   load(page: number = 1, pageSize: number = 10, query?: string): void {
@@ -148,6 +173,27 @@ export class TutorFacade {
     } finally {
       this.loadingSubject.next(false);
     }
+  }
+
+  async loadTutorDetail(tutorId: number): Promise<void> {
+    this.detailLoadingSubject.next(true);
+    this.errorSubject.next(null);
+
+    try {
+      const tutorDetail = await this.tutorApi.getTutorDetail(tutorId);
+      this.tutorDetailSubject.next(tutorDetail);
+    } catch (error) {
+      this.errorSubject.next(this.extractErrorMessage(error));
+      this.tutorDetailSubject.next(null);
+      throw error;
+    } finally {
+      this.detailLoadingSubject.next(false);
+    }
+  }
+
+  clearTutorDetail(): void {
+    this.tutorDetailSubject.next(null);
+    this.errorSubject.next(null);
   }
 
   reset(): void {

@@ -15,6 +15,21 @@ export interface TutorApiResponse {
   };
 }
 
+export interface TutorDetailApiResponse extends TutorApiResponse {
+  pets?: Array<{
+    id: number;
+    nome: string;
+    raca?: string;
+    idade?: number;
+    foto?: {
+      id: number;
+      nome?: string;
+      contentType?: string;
+      url?: string;
+    };
+  }>;
+}
+
 export interface PaginatedTutoresApiResponse {
   content: TutorApiResponse[];
   page: number;
@@ -68,6 +83,11 @@ export class TutorApi {
 
   async deleteTutor(tutorId: number): Promise<void> {
     await this.httpClient.delete(`/v1/tutores/${tutorId}`);
+  }
+
+  async getTutorDetail(tutorId: number): Promise<TutorDetailApiResponse> {
+    const response = await this.httpClient.get<TutorDetailApiResponse>(`/v1/tutores/${tutorId}`);
+    return response.data;
   }
 
   async uploadFoto(tutorId: number, foto: File): Promise<{ id: number; nome?: string; contentType?: string; url?: string }> {
