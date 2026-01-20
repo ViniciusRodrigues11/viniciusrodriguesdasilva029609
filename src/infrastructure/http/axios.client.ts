@@ -25,7 +25,6 @@ export class AxiosClient {
   }
 
   private setupInterceptors(): void {
-    // Request interceptor - adiciona token em todas as requisições
     this.client.interceptors.request.use((config) => {
       const token = this.tokenStorage?.getAccessToken();
       if (token) {
