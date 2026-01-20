@@ -1,26 +1,19 @@
+// Dependencies
 import { useState } from "react";
 import { ActionModal } from "../action-modal/action-modal";
 import { AddButton } from "../ui/add-button";
+import { FormInput } from "../ui/form-input";
 import { validators } from "../../../helpers/validatorsHelper";
+import { petFacade } from "../../../services/pet.service";
 
+// Types
 interface AddPetModalProps {
   onPetAdded?: () => void;
 }
-
-type PetForm = {
-  nome: string;
-  raca: string;
-  idade: string;
-};
-
+type PetForm = { nome: string; raca: string; idade: string };
 type PetErrors = Record<keyof PetForm, string>;
 
-const BASE_FIELDS = {
-  nome: "",
-  raca: "",
-  idade: "",
-};
-
+const BASE_FIELDS = { nome: "", raca: "", idade: "" };
 const emptyForm = (): PetForm => ({ ...BASE_FIELDS });
 const emptyErrors = (): PetErrors => ({ ...BASE_FIELDS });
 
@@ -30,17 +23,14 @@ const petValidators: Record<keyof PetForm, (v: string) => string> = {
   idade: validators.age,
 };
 
-const validateForm = (
-  formData: PetForm,
-): { ok: boolean; errors: PetErrors } => {
+const validate = (data: PetForm) => {
   const errors = emptyErrors();
 
-  (Object.keys(formData) as (keyof PetForm)[]).forEach((key) => {
-    errors[key] = petValidators[key](formData[key]);
+  (Object.entries(data) as [keyof PetForm, string][]).forEach(([k, v]) => {
+    errors[k] = petValidators[k](v);
   });
 
-  const ok = (Object.values(errors) as string[]).every((e) => e === "");
-  return { ok, errors };
+  return { ok: Object.values(errors).every((e) => !e), errors };
 };
 
 export function AddPetModal({ onPetAdded }: AddPetModalProps) {
@@ -48,141 +38,101 @@ export function AddPetModal({ onPetAdded }: AddPetModalProps) {
   const [formData, setFormData] = useState<PetForm>(emptyForm());
   const [errors, setErrors] = useState<PetErrors>(emptyErrors());
 
-  const handleAddPet = async () => {
-    const { ok, errors: newErrors } = validateForm(formData);
+  const validateForm = (): boolean => {
+    const { ok, errors: newErrors } = validate(formData);
     setErrors(newErrors);
+    return ok;
+  };
 
-    if (!ok) {
+  const resetState = () => {
+    setFormData(emptyForm());
+    setErrors(emptyErrors());
+  };
+
+  const handleAddPet = async () => {
+    if (!validateForm()) {
       throw new Error("Validação falhou");
     }
 
     try {
-      const response = await fetch("/v1/pets", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nome: formData.nome,
-          raca: formData.raca,
-          idade: Number(formData.idade),
-        }),
+      await petFacade.addPet({
+        nome: formData.nome.trim(),
+        raca: formData.raca.trim(),
+        idade: Number(formData.idade),
       });
 
-      if (!response.ok) {
-        throw new Error("Erro ao adicionar pet");
-      }
-
-      // Reset form
-      setFormData({ nome: "", raca: "", idade: "" });
-      setErrors({ nome: "", raca: "", idade: "" });
-
-      // Callback para recarregar lista
+      resetState();
       onPetAdded?.();
+      setIsOpen(false);
     } catch (error) {
       console.error("Erro ao adicionar pet:", error);
       throw error;
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = <K extends keyof PetForm>(
+    field: K,
+    value: string,
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Limpar erro ao começar a digitar
-    if (errors[field as keyof typeof errors]) {
+    if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
     }
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+    resetState();
   };
 
   return (
     <>
       <AddButton onClick={() => setIsOpen(true)} label="Novo Pet" />
-
       <ActionModal
         isOpen={isOpen}
         title="Adicionar Novo Pet"
         description="Preencha os dados do novo pet para cadastrá-lo no sistema"
-        onClose={() => {
-          setIsOpen(false);
-          setFormData({ nome: "", raca: "", idade: "" });
-          setErrors({ nome: "", raca: "", idade: "" });
-        }}
+        onClose={handleClose}
         onConfirm={handleAddPet}
         confirmButtonLabel="Adicionar Pet"
         confirmButtonVariant="primary"
         size="md"
       >
         <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-          <div>
-            <label
-              htmlFor="pet-name"
-              className="block text-sm font-medium text-slate-700"
-            >
-              Nome do Pet *
-            </label>
-            <input
-              id="pet-name"
-              type="text"
-              value={formData.nome}
-              onChange={(e) => handleInputChange("nome", e.target.value)}
-              className={`mt-1 w-full rounded-lg border px-3 py-2 transition focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-                errors.nome
-                  ? "border-red-300 focus:border-red-400 focus:ring-red-500"
-                  : "border-slate-300 focus:border-indigo-400 focus:ring-indigo-500"
-              }`}
-              placeholder="Ex: Rex, Fluffy"
-            />
-            {errors.nome && (
-              <p className="mt-1 text-xs text-red-600">{errors.nome}</p>
-            )}
-          </div>
+          <FormInput
+            id="pet-name"
+            label="Nome do Pet"
+            type="text"
+            value={formData.nome}
+            onChange={(e) => handleInputChange("nome", e.target.value)}
+            error={errors.nome}
+            required
+            placeholder="Ex: Rex, Fluffy"
+          />
 
-          <div>
-            <label
-              htmlFor="pet-raca"
-              className="block text-sm font-medium text-slate-700"
-            >
-              Raça *
-            </label>
-            <input
-              id="pet-raca"
-              type="text"
-              value={formData.raca}
-              onChange={(e) => handleInputChange("raca", e.target.value)}
-              className={`mt-1 w-full rounded-lg border px-3 py-2 transition focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-                errors.raca
-                  ? "border-red-300 focus:border-red-400 focus:ring-red-500"
-                  : "border-slate-300 focus:border-indigo-400 focus:ring-indigo-500"
-              }`}
-              placeholder="Ex: Labrador, Persa"
-            />
-            {errors.raca && (
-              <p className="mt-1 text-xs text-red-600">{errors.raca}</p>
-            )}
-          </div>
+          <FormInput
+            id="pet-raca"
+            label="Raça"
+            type="text"
+            value={formData.raca}
+            onChange={(e) => handleInputChange("raca", e.target.value)}
+            error={errors.raca}
+            required
+            placeholder="Ex: Labrador, Persa"
+          />
 
-          <div>
-            <label
-              htmlFor="pet-idade"
-              className="block text-sm font-medium text-slate-700"
-            >
-              Idade (anos) *
-            </label>
-            <input
-              id="pet-idade"
-              type="number"
-              min="0"
-              step="1"
-              value={formData.idade}
-              onChange={(e) => handleInputChange("idade", e.target.value)}
-              className={`mt-1 w-full rounded-lg border px-3 py-2 transition focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-                errors.idade
-                  ? "border-red-300 focus:border-red-400 focus:ring-red-500"
-                  : "border-slate-300 focus:border-indigo-400 focus:ring-indigo-500"
-              }`}
-              placeholder="Ex: 3, 5"
-            />
-            {errors.idade && (
-              <p className="mt-1 text-xs text-red-600">{errors.idade}</p>
-            )}
-          </div>
+          <FormInput
+            id="pet-idade"
+            label="Idade (anos)"
+            type="number"
+            min={0}
+            step={1}
+            value={formData.idade}
+            onChange={(e) => handleInputChange("idade", e.target.value)}
+            error={errors.idade}
+            required
+            placeholder="Ex: 3, 5"
+          />
         </form>
       </ActionModal>
     </>

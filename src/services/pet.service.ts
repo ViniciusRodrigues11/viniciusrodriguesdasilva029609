@@ -11,4 +11,4 @@ const petApi = new PetApi(axiosClient.instance);
 const petRepository = new PetRepositoryImpl(petApi);
 const listPetsUseCase = new ListPetsUseCase(petRepository);
 
-export const petFacade = new PetFacade(listPetsUseCase);
+export const petFacade = new PetFacade(listPetsUseCase, petApi);

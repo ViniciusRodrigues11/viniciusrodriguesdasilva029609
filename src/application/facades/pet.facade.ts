@@ -1,6 +1,7 @@
 import { BehaviorSubject, type Observable } from 'rxjs';
 import type { PetEntity } from '../../domain/entities/pet.entity';
 import type { ListPetsUseCase } from '../use-cases/list-pets.use-case';
+import type { PetApi, CreatePetApiPayload } from '../../infrastructure/api/pet.api';
 
 export interface PetPaginationState {
   page: number;
@@ -18,7 +19,10 @@ export class PetFacade {
     total: null,
   });
 
-  constructor(private readonly listPetsUseCase: ListPetsUseCase) { }
+  constructor(
+    private readonly listPetsUseCase: ListPetsUseCase,
+    private readonly petApi: PetApi,
+  ) { }
 
   get pets$(): Observable<PetEntity[]> {
     return this.petsSubject.asObservable();
@@ -60,6 +64,21 @@ export class PetFacade {
       });
   }
 
+  async addPet(petData: CreatePetApiPayload): Promise<PetEntity> {
+    this.loadingSubject.next(true);
+    this.errorSubject.next(null);
+
+    try {
+      const createdPet = await this.petApi.createPet(petData);
+      return createdPet as unknown as PetEntity;
+    } catch (error: unknown) {
+      this.errorSubject.next(this.extractErrorMessage(error));
+      throw error;
+    } finally {
+      this.loadingSubject.next(false);
+    }
+  }
+
   async deletePet(petId: number): Promise<void> {
     this.loadingSubject.next(true);
     this.errorSubject.next(null);
@@ -98,8 +117,8 @@ export class PetFacade {
     }
     if (error instanceof Error) {
       if (error.message === 'Network Error') return 'Erro de conexão com o servidor.';
-      return error.message || 'Erro ao carregar pets.';
+      return error.message || 'Erro ao processar solicitação.';
     }
-    return 'Erro ao carregar pets.';
+    return 'Erro ao processar solicitação.';
   }
 }

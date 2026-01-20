@@ -27,6 +27,12 @@ export interface ListPetsApiParams {
   nome?: string;
 }
 
+export interface CreatePetApiPayload {
+  nome: string;
+  raca: string;
+  idade: number;
+}
+
 export class PetApi {
   constructor(private readonly httpClient: AxiosInstance) { }
 
@@ -35,6 +41,11 @@ export class PetApi {
       params,
     });
 
+    return response.data;
+  }
+
+  async createPet(payload: CreatePetApiPayload): Promise<PetApiResponse> {
+    const response = await this.httpClient.post<PetApiResponse>('/v1/pets', payload);
     return response.data;
   }
 
