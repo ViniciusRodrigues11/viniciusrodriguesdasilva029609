@@ -2,7 +2,7 @@ import { BehaviorSubject, type Observable } from 'rxjs';
 import type { TutorEntity } from '../../domain/entities/tutor.entity';
 import type { ListTutoresUseCase } from '../use-cases/list-tutores.use-case';
 import type { DeleteTutorUseCase } from '../use-cases/delete-tutor.use-case';
-import type { TutorApi, CreateTutorApiPayload } from '../../infrastructure/api/tutor.api';
+import type { TutorApi, CreateTutorApiPayload, UpdateTutorApiPayload } from '../../infrastructure/api/tutor.api';
 
 export interface TutorPaginationState {
   page: number;
@@ -81,6 +81,22 @@ export class TutorFacade {
     }
   }
 
+  async updateTutor(tutorId: number, tutorData: UpdateTutorApiPayload): Promise<TutorEntity> {
+    this.loadingSubject.next(true);
+    this.errorSubject.next(null);
+
+    try {
+      const updatedTutor = await this.tutorApi.updateTutor(tutorId, tutorData);
+      return updatedTutor;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao atualizar tutor';
+      this.errorSubject.next(errorMessage);
+      throw error;
+    } finally {
+      this.loadingSubject.next(false);
+    }
+  }
+
   async deleteTutor(tutorId: number): Promise<void> {
     this.loadingSubject.next(true);
     this.errorSubject.next(null);
@@ -112,6 +128,20 @@ export class TutorFacade {
 
     try {
       await this.tutorApi.uploadFoto(tutorId, foto);
+    } catch (error) {
+      this.errorSubject.next(this.extractErrorMessage(error));
+      throw error;
+    } finally {
+      this.loadingSubject.next(false);
+    }
+  }
+
+  async deleteFoto(tutorId: number, fotoId: number): Promise<void> {
+    this.loadingSubject.next(true);
+    this.errorSubject.next(null);
+
+    try {
+      await this.tutorApi.deleteFoto(tutorId, fotoId);
     } catch (error) {
       this.errorSubject.next(this.extractErrorMessage(error));
       throw error;

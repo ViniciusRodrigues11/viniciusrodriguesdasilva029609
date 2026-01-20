@@ -37,6 +37,14 @@ export interface CreateTutorApiPayload {
   cpf: number;
 }
 
+export interface UpdateTutorApiPayload {
+  nome: string;
+  email: string;
+  telefone: string;
+  endereco: string;
+  cpf: number;
+}
+
 export class TutorApi {
   constructor(private readonly httpClient: AxiosInstance) { }
 
@@ -50,6 +58,11 @@ export class TutorApi {
 
   async createTutor(payload: CreateTutorApiPayload): Promise<TutorApiResponse> {
     const response = await this.httpClient.post<TutorApiResponse>('/v1/tutores', payload);
+    return response.data;
+  }
+
+  async updateTutor(tutorId: number, payload: UpdateTutorApiPayload): Promise<TutorApiResponse> {
+    const response = await this.httpClient.put<TutorApiResponse>(`/v1/tutores/${tutorId}`, payload);
     return response.data;
   }
 
@@ -68,5 +81,9 @@ export class TutorApi {
     });
 
     return response.data;
+  }
+
+  async deleteFoto(tutorId: number, fotoId: number): Promise<void> {
+    await this.httpClient.delete(`/v1/tutores/${tutorId}/fotos/${fotoId}`);
   }
 }

@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TutorCard } from "../../components/tutores/tutor-card";
-import { AddTutorModal } from "../../components/tutores/add-tutor-modal";
+import {
+  AddTutorModal,
+  TutorUpsertModal,
+} from "../../components/tutores/add-tutor-modal";
 import { Pagination } from "../../components/ui/pagination";
 import { SearchInput } from "../../components/ui/search-input";
 import { EmptyState } from "../../components/ui/empty-state";
@@ -34,6 +37,7 @@ export function TutoresListPage() {
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [tutorToDelete, setTutorToDelete] = useState<TutorEntity | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [tutorToEdit, setTutorToEdit] = useState<TutorEntity | null>(null);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -82,6 +86,13 @@ export function TutoresListPage() {
     }
   };
 
+  const handleEditClick = (tutorId: number) => {
+    const tutor = tutores.find((t) => t.id === tutorId);
+    if (tutor) {
+      setTutorToEdit(tutor);
+    }
+  };
+
   const handleConfirmDelete = async () => {
     if (!tutorToDelete) return;
 
@@ -103,6 +114,11 @@ export function TutoresListPage() {
 
   const handleCancelDelete = () => {
     setTutorToDelete(null);
+  };
+
+  const handleTutorUpdated = () => {
+    setTutorToEdit(null);
+    tutorFacade.load(pagination.page, PAGE_SIZE, debouncedQuery);
   };
 
   const hasNextPage = useMemo(() => {
@@ -157,10 +173,23 @@ export function TutoresListPage() {
               key={tutor.id}
               tutor={tutor}
               onClick={goToTutorDetail}
+              onEdit={handleEditClick}
               onDelete={handleDeleteClick}
             />
           ))}
         </div>
+
+        <TutorUpsertModal
+          mode="edit"
+          tutor={tutorToEdit}
+          isOpen={!!tutorToEdit}
+          onOpenChange={(open) => {
+            if (!open) {
+              setTutorToEdit(null);
+            }
+          }}
+          onSuccess={handleTutorUpdated}
+        />
 
         <ActionModal
           isOpen={!!tutorToDelete}
