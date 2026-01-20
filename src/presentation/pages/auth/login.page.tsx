@@ -1,9 +1,34 @@
-import type { FormEvent } from "react";
+// Dependencies
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useObservable } from "../../hooks/use-observable.hook";
+import { FormInput } from "../../components/ui/form-input";
 import { authFacade } from "../../../services/auth.service";
+import { validators } from "../../../helpers/validatorsHelper";
+
+// Types
 import type { CredentialsEntity } from "../../../domain/entities/auth.entity";
+type LoginForm = { username: string; password: string };
+type LoginErrors = Record<keyof LoginForm, string>;
+
+const BASE_FIELDS = { username: "", password: "" };
+const emptyForm = (): LoginForm => ({ ...BASE_FIELDS });
+const emptyErrors = (): LoginErrors => ({ ...BASE_FIELDS });
+
+const loginFormValidators: Record<keyof LoginForm, (v: string) => string> = {
+  username: validators.required,
+  password: validators.password,
+};
+
+const validate = (data: LoginForm) => {
+  const errors = emptyErrors();
+
+  (Object.entries(data) as [keyof LoginForm, string][]).forEach(([k, v]) => {
+    errors[k] = loginFormValidators[k](v);
+  });
+
+  return { ok: Object.values(errors).every((e) => !e), errors };
+};
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -14,76 +39,40 @@ export function LoginPage() {
     authFacade.isAuthenticatedSync(),
   );
 
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState<LoginForm>(emptyForm());
+  const [errors, setErrors] = useState<LoginErrors>(emptyErrors());
 
-  const [formErrors, setFormErrors] = useState({
-    username: "",
-    password: "",
-  });
-
-  const validateField = (name: string, value: string): string => {
-    if (!value.trim()) {
-      return `${name === "username" ? "Usuário" : "Senha"} é obrigatório`;
-    }
-
-    if (name === "password" && value.length < 3) {
-      return "Senha deve ter no mínimo 3 caracteres";
-    }
-
-    return "";
+  const validateForm = (): boolean => {
+    const { ok, errors: newErrors } = validate(formData);
+    setErrors(newErrors);
+    return ok;
   };
 
   if (isAuthenticated) {
     navigate("/pets", { replace: true });
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  const handleInputChange = <K extends keyof LoginForm>(
+    field: K,
+    value: string,
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    if (formErrors[name as keyof typeof formErrors]) {
-      setFormErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
-  const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    const error = validateField(name, value);
-
-    setFormErrors((prev) => ({
-      ...prev,
-      [name]: error,
-    }));
-  };
-
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const usernameError = validateField("username", formData.username);
-    const passwordError = validateField("password", formData.password);
-
-    if (usernameError || passwordError) {
-      setFormErrors({
-        username: usernameError,
-        password: passwordError,
-      });
+    if (!validateForm()) {
       return;
     }
 
-    // Dispara o login
     const credentials: CredentialsEntity = {
-      username: formData.username,
-      password: formData.password,
+      username: formData.username.trim(),
+      password: formData.password.trim(),
     };
 
     authFacade.login(credentials);
@@ -109,63 +98,29 @@ export function LoginPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Nome de usuário
-              </label>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                value={formData.username}
-                onChange={handleInputChange}
-                onBlur={handleInputBlur}
-                placeholder="pai_de_pet"
-                disabled={isLoading}
-                className={`w-full px-4 py-2 border rounded-md text-gray-900 placeholder-gray-400 transition-colors ${
-                  formErrors.username
-                    ? "border-red-500 focus:ring-red-500"
-                    : "border-gray-300 focus:ring-indigo-500"
-                } focus:outline-none focus:ring-2 disabled:bg-gray-50 disabled:cursor-not-allowed`}
-              />
-              {formErrors.username && (
-                <p className="mt-1 text-sm text-red-600">
-                  {formErrors.username}
-                </p>
-              )}
-            </div>
+            <FormInput
+              id="username"
+              label="Nome de usuário"
+              type="text"
+              value={formData.username}
+              onChange={(e) => handleInputChange("username", e.target.value)}
+              error={errors.username}
+              required
+              placeholder="pai_de_pet"
+              disabled={isLoading}
+            />
 
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Senha
-              </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                onBlur={handleInputBlur}
-                placeholder="••••••••"
-                disabled={isLoading}
-                className={`w-full px-4 py-2 border rounded-md text-gray-900 placeholder-gray-400 transition-colors ${
-                  formErrors.password
-                    ? "border-red-500 focus:ring-red-500"
-                    : "border-gray-300 focus:ring-indigo-500"
-                } focus:outline-none focus:ring-2 disabled:bg-gray-50 disabled:cursor-not-allowed`}
-              />
-              {formErrors.password && (
-                <p className="mt-1 text-sm text-red-600">
-                  {formErrors.password}
-                </p>
-              )}
-            </div>
+            <FormInput
+              id="password"
+              label="Senha"
+              type="password"
+              value={formData.password}
+              onChange={(e) => handleInputChange("password", e.target.value)}
+              error={errors.password}
+              required
+              placeholder="••••••••"
+              disabled={isLoading}
+            />
 
             <button
               type="submit"

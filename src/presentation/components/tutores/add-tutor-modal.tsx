@@ -1,80 +1,76 @@
 import { useState } from "react";
 import { ActionModal } from "../action-modal/action-modal";
 import { AddButton } from "../ui/add-button";
+import { FormInput } from "../ui/form-input";
 import { tutorFacade } from "../../../services/tutor.service";
 import { applyPhoneMask, applyCpfMask } from "../../../helpers/maskHelpers";
-import { isValidCpf } from "../../../helpers/validatorsHelper";
+import { createValidator, validators } from "../../../helpers/validatorsHelper";
 
 interface AddTutorModalProps {
   onTutorAdded?: () => void;
 }
 
+type TutorForm = {
+  nome: string;
+  email: string;
+  telefone: string;
+  endereco: string;
+  cpf: string;
+};
+
+type TutorErrors = Record<keyof TutorForm, string>;
+
+const BASE_FIELDS = {
+  nome: "",
+  email: "",
+  telefone: "",
+  endereco: "",
+  cpf: "",
+};
+
+const emptyForm = (): TutorForm => ({ ...BASE_FIELDS });
+const emptyErrors = (): TutorErrors => ({ ...BASE_FIELDS });
+
+const onlyDigits = (v: string) => v.replace(/\D/g, "");
+
+const addressValidator = createValidator(
+  validators.required,
+  validators.minLength(10),
+  validators.maxLength(300),
+);
+
+const tutorFormValidators: Record<keyof TutorForm, (v: string) => string> = {
+  nome: validators.name,
+  email: validators.email,
+  telefone: validators.phone,
+  endereco: addressValidator,
+  cpf: validators.cpf,
+};
+
+const validate = (data: TutorForm) => {
+  const errors = emptyErrors();
+
+  (Object.entries(data) as [keyof TutorForm, string][]).forEach(([k, v]) => {
+    errors[k] = tutorFormValidators[k](v);
+  });
+
+  return { ok: Object.values(errors).every((e) => !e), errors };
+};
+
 export function AddTutorModal({ onTutorAdded }: AddTutorModalProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    nome: "",
-    email: "",
-    telefone: "",
-    endereco: "",
-    cpf: "",
-  });
-  const [errors, setErrors] = useState({
-    nome: "",
-    email: "",
-    telefone: "",
-    endereco: "",
-    cpf: "",
-  });
+  const [formData, setFormData] = useState<TutorForm>(emptyForm());
+  const [errors, setErrors] = useState<TutorErrors>(emptyErrors());
 
   const validateForm = (): boolean => {
-    const newErrors = {
-      nome: "",
-      email: "",
-      telefone: "",
-      endereco: "",
-      cpf: "",
-    };
-    let isValid = true;
-
-    if (!formData.nome.trim()) {
-      newErrors.nome = "Nome é obrigatório";
-      isValid = false;
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = "Email é obrigatório";
-      isValid = false;
-    } else if (!formData.email.includes("@")) {
-      newErrors.email = "Email inválido";
-      isValid = false;
-    }
-
-    if (!formData.telefone.trim()) {
-      newErrors.telefone = "Telefone é obrigatório";
-      isValid = false;
-    } else {
-      const cleaned = formData.telefone.replace(/\D/g, "");
-      if (cleaned.length < 10 || cleaned.length > 11) {
-        newErrors.telefone = "Telefone deve ter 10 ou 11 dígitos";
-        isValid = false;
-      }
-    }
-
-    if (!formData.endereco.trim()) {
-      newErrors.endereco = "Endereço é obrigatório";
-      isValid = false;
-    }
-
-    if (!formData.cpf.trim()) {
-      newErrors.cpf = "CPF é obrigatório";
-      isValid = false;
-    } else if (!isValidCpf(formData.cpf)) {
-      newErrors.cpf = "CPF inválido";
-      isValid = false;
-    }
-
+    const { ok, errors: newErrors } = validate(formData);
     setErrors(newErrors);
-    return isValid;
+    return ok;
+  };
+
+  const resetState = () => {
+    setFormData(emptyForm());
+    setErrors(emptyErrors());
   };
 
   const handleAddTutor = async () => {
@@ -84,40 +80,41 @@ export function AddTutorModal({ onTutorAdded }: AddTutorModalProps) {
 
     try {
       await tutorFacade.addTutor({
-        nome: formData.nome,
-        email: formData.email,
-        telefone: formData.telefone,
-        endereco: formData.endereco,
-        cpf: parseInt(formData.cpf.replace(/\D/g, "")),
+        nome: formData.nome.trim(),
+        email: formData.email.trim(),
+        telefone: onlyDigits(formData.telefone),
+        endereco: formData.endereco.trim(),
+        cpf: Number(onlyDigits(formData.cpf)),
       });
 
-      // Reset form
-      setFormData({ nome: "", email: "", telefone: "", endereco: "", cpf: "" });
-      setErrors({ nome: "", email: "", telefone: "", endereco: "", cpf: "" });
-
-      // Callback para recarregar lista
+      resetState();
       onTutorAdded?.();
+      setIsOpen(false);
     } catch (error) {
       console.error("Erro ao adicionar tutor:", error);
       throw error;
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = <K extends keyof TutorForm>(
+    field: K,
+    value: string,
+  ) => {
     let processedValue = value;
 
-    // Aplicar máscaras
-    if (field === "telefone") {
-      processedValue = applyPhoneMask(value);
-    } else if (field === "cpf") {
-      processedValue = applyCpfMask(value);
-    }
+    if (field === "telefone") processedValue = applyPhoneMask(value);
+    if (field === "cpf") processedValue = applyCpfMask(value);
 
     setFormData((prev) => ({ ...prev, [field]: processedValue }));
-    // Limpar erro ao começar a digitar
-    if (errors[field as keyof typeof errors]) {
+
+    if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
     }
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+    resetState();
   };
 
   return (
@@ -128,150 +125,69 @@ export function AddTutorModal({ onTutorAdded }: AddTutorModalProps) {
         isOpen={isOpen}
         title="Adicionar Novo Tutor"
         description="Preencha os dados do novo tutor para cadastrá-lo no sistema"
-        onClose={() => {
-          setIsOpen(false);
-          setFormData({
-            nome: "",
-            email: "",
-            telefone: "",
-            endereco: "",
-            cpf: "",
-          });
-          setErrors({
-            nome: "",
-            email: "",
-            telefone: "",
-            endereco: "",
-            cpf: "",
-          });
-        }}
+        onClose={handleClose}
         onConfirm={handleAddTutor}
         confirmButtonLabel="Adicionar Tutor"
         confirmButtonVariant="primary"
         size="md"
       >
         <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-          <div>
-            <label
-              htmlFor="tutor-name"
-              className="block text-sm font-medium text-slate-700"
-            >
-              Nome Completo *
-            </label>
-            <input
-              id="tutor-name"
-              type="text"
-              value={formData.nome}
-              onChange={(e) => handleInputChange("nome", e.target.value)}
-              className={`mt-1 w-full rounded-lg border px-3 py-2 transition focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-                errors.nome
-                  ? "border-red-300 focus:border-red-400 focus:ring-red-500"
-                  : "border-slate-300 focus:border-indigo-400 focus:ring-indigo-500"
-              }`}
-              placeholder="Ex: João Silva"
-            />
-            {errors.nome && (
-              <p className="mt-1 text-xs text-red-600">{errors.nome}</p>
-            )}
-          </div>
+          <FormInput
+            id="tutor-name"
+            label="Nome Completo"
+            type="text"
+            value={formData.nome}
+            onChange={(e) => handleInputChange("nome", e.target.value)}
+            error={errors.nome}
+            required
+            placeholder="Ex: João Silva"
+          />
 
-          <div>
-            <label
-              htmlFor="tutor-email"
-              className="block text-sm font-medium text-slate-700"
-            >
-              Email *
-            </label>
-            <input
-              id="tutor-email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => handleInputChange("email", e.target.value)}
-              className={`mt-1 w-full rounded-lg border px-3 py-2 transition focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-                errors.email
-                  ? "border-red-300 focus:border-red-400 focus:ring-red-500"
-                  : "border-slate-300 focus:border-indigo-400 focus:ring-indigo-500"
-              }`}
-              placeholder="Ex: joao@example.com"
-            />
-            {errors.email && (
-              <p className="mt-1 text-xs text-red-600">{errors.email}</p>
-            )}
-          </div>
+          <FormInput
+            id="tutor-email"
+            label="Email"
+            type="email"
+            value={formData.email}
+            onChange={(e) => handleInputChange("email", e.target.value)}
+            error={errors.email}
+            required
+            placeholder="Ex: joao@example.com"
+          />
 
-          <div>
-            <label
-              htmlFor="tutor-phone"
-              className="block text-sm font-medium text-slate-700"
-            >
-              Telefone *
-            </label>
-            <input
-              id="tutor-phone"
-              type="tel"
-              value={formData.telefone}
-              onChange={(e) => handleInputChange("telefone", e.target.value)}
-              className={`mt-1 w-full rounded-lg border px-3 py-2 transition focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-                errors.telefone
-                  ? "border-red-300 focus:border-red-400 focus:ring-red-500"
-                  : "border-slate-300 focus:border-indigo-400 focus:ring-indigo-500"
-              }`}
-              placeholder="Ex: (11) 99999-9999"
-              maxLength={15}
-            />
-            {errors.telefone && (
-              <p className="mt-1 text-xs text-red-600">{errors.telefone}</p>
-            )}
-          </div>
+          <FormInput
+            id="tutor-phone"
+            label="Telefone"
+            type="tel"
+            value={formData.telefone}
+            onChange={(e) => handleInputChange("telefone", e.target.value)}
+            error={errors.telefone}
+            required
+            placeholder="Ex: (11) 99999-9999"
+            maxLength={15}
+          />
 
-          <div>
-            <label
-              htmlFor="tutor-cpf"
-              className="block text-sm font-medium text-slate-700"
-            >
-              CPF *
-            </label>
-            <input
-              id="tutor-cpf"
-              type="text"
-              value={formData.cpf}
-              onChange={(e) => handleInputChange("cpf", e.target.value)}
-              className={`mt-1 w-full rounded-lg border px-3 py-2 transition focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-                errors.cpf
-                  ? "border-red-300 focus:border-red-400 focus:ring-red-500"
-                  : "border-slate-300 focus:border-indigo-400 focus:ring-indigo-500"
-              }`}
-              placeholder="Ex: 123.456.789-01"
-              maxLength={14}
-            />
-            {errors.cpf && (
-              <p className="mt-1 text-xs text-red-600">{errors.cpf}</p>
-            )}
-          </div>
+          <FormInput
+            id="tutor-cpf"
+            label="CPF"
+            type="text"
+            value={formData.cpf}
+            onChange={(e) => handleInputChange("cpf", e.target.value)}
+            error={errors.cpf}
+            required
+            placeholder="Ex: 123.456.789-01"
+            maxLength={14}
+          />
 
-          <div>
-            <label
-              htmlFor="tutor-address"
-              className="block text-sm font-medium text-slate-700"
-            >
-              Endereço *
-            </label>
-            <input
-              id="tutor-address"
-              type="text"
-              value={formData.endereco}
-              onChange={(e) => handleInputChange("endereco", e.target.value)}
-              className={`mt-1 w-full rounded-lg border px-3 py-2 transition focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-                errors.endereco
-                  ? "border-red-300 focus:border-red-400 focus:ring-red-500"
-                  : "border-slate-300 focus:border-indigo-400 focus:ring-indigo-500"
-              }`}
-              placeholder="Ex: Rua das Flores, 123, Bairro Centro, São Paulo - SP"
-            />
-            {errors.endereco && (
-              <p className="mt-1 text-xs text-red-600">{errors.endereco}</p>
-            )}
-          </div>
+          <FormInput
+            id="tutor-address"
+            label="Endereço"
+            type="text"
+            value={formData.endereco}
+            onChange={(e) => handleInputChange("endereco", e.target.value)}
+            error={errors.endereco}
+            required
+            placeholder="Ex: Rua das Flores, 123, Bairro Centro, São Paulo - SP"
+          />
         </form>
       </ActionModal>
     </>

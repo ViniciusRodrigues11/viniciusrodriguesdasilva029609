@@ -1,49 +1,58 @@
 import { useState } from "react";
 import { ActionModal } from "../action-modal/action-modal";
 import { AddButton } from "../ui/add-button";
+import { validators } from "../../../helpers/validatorsHelper";
 
 interface AddPetModalProps {
   onPetAdded?: () => void;
 }
 
+type PetForm = {
+  nome: string;
+  raca: string;
+  idade: string;
+};
+
+type PetErrors = Record<keyof PetForm, string>;
+
+const BASE_FIELDS = {
+  nome: "",
+  raca: "",
+  idade: "",
+};
+
+const emptyForm = (): PetForm => ({ ...BASE_FIELDS });
+const emptyErrors = (): PetErrors => ({ ...BASE_FIELDS });
+
+const petValidators: Record<keyof PetForm, (v: string) => string> = {
+  nome: validators.name,
+  raca: validators.required,
+  idade: validators.age,
+};
+
+const validateForm = (
+  formData: PetForm,
+): { ok: boolean; errors: PetErrors } => {
+  const errors = emptyErrors();
+
+  (Object.keys(formData) as (keyof PetForm)[]).forEach((key) => {
+    errors[key] = petValidators[key](formData[key]);
+  });
+
+  const ok = (Object.values(errors) as string[]).every((e) => e === "");
+  return { ok, errors };
+};
+
 export function AddPetModal({ onPetAdded }: AddPetModalProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    nome: "",
-    raca: "",
-    idade: "",
-  });
-  const [errors, setErrors] = useState({
-    nome: "",
-    raca: "",
-    idade: "",
-  });
-
-  const validateForm = (): boolean => {
-    const newErrors = { nome: "", raca: "", idade: "" };
-    let isValid = true;
-
-    if (!formData.nome.trim()) {
-      newErrors.nome = "Nome é obrigatório";
-      isValid = false;
-    }
-
-    if (!formData.raca.trim()) {
-      newErrors.raca = "Raça é obrigatória";
-      isValid = false;
-    }
-
-    if (!formData.idade || Number(formData.idade) < 0) {
-      newErrors.idade = "Idade deve ser um número válido";
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
-  };
+  const [formData, setFormData] = useState<PetForm>(emptyForm());
+  const [errors, setErrors] = useState<PetErrors>(emptyErrors());
 
   const handleAddPet = async () => {
-    if (!validateForm()) {
+    const { ok, errors: newErrors } = validateForm(formData);
+    setErrors(newErrors);
+
+    if (!ok) {
       throw new Error("Validação falhou");
     }
 
