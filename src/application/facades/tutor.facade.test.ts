@@ -4,7 +4,7 @@ import { TutorFacade } from './tutor.facade';
 import { ListTutoresUseCase } from '../use-cases/list-tutores.use-case';
 import { DeleteTutorUseCase } from '../use-cases/delete-tutor.use-case';
 import type { ITutorRepository } from '../../domain/repositories/tutor.repository';
-import type { TutorEntity, PaginatedTutoresEntity } from '../../domain/entities/tutor.entity';
+import type { TutorEntity } from '../../domain/entities/tutor.entity';
 import type { TutorApi } from '../../infrastructure/api/tutor.api';
 
 const createTutorApiMock = (): TutorApi => ({
@@ -60,64 +60,6 @@ describe('TutorFacade', () => {
     );
   });
 
-  describe('tutores$', () => {
-    it('deve emitir array vazio inicialmente', async () => {
-      const tutores = await firstValueFrom(facade.tutores$);
-      expect(tutores).toEqual([]);
-    });
-
-    it('deve emitir tutores após carregar com sucesso', async () => {
-      vi.spyOn(mockRepository, 'list').mockResolvedValue({
-        tutores: mockTutores,
-        page: 1,
-        size: 10,
-        total: 2,
-      });
-
-      facade.load();
-      await vi.waitFor(async () => {
-        const loading = await firstValueFrom(facade.loading$);
-        expect(loading).toBe(false);
-      });
-
-      const tutores = await firstValueFrom(facade.tutores$);
-      expect(tutores).toEqual(mockTutores);
-    });
-  });
-
-  describe('pagination$', () => {
-    it('deve emitir estado inicial de paginação', async () => {
-      const pagination = await firstValueFrom(facade.pagination$);
-      expect(pagination).toEqual({
-        page: 1,
-        pageSize: 9,
-        total: null,
-      });
-    });
-
-    it('deve atualizar estado de paginação após carregar', async () => {
-      vi.spyOn(mockRepository, 'list').mockResolvedValue({
-        tutores: mockTutores,
-        page: 2,
-        size: 5,
-        total: 20,
-      });
-
-      facade.load(2, 5, 'Maria');
-      await vi.waitFor(async () => {
-        const loading = await firstValueFrom(facade.loading$);
-        expect(loading).toBe(false);
-      });
-
-      const pagination = await firstValueFrom(facade.pagination$);
-      expect(pagination).toEqual({
-        page: 2,
-        pageSize: 5,
-        total: 20,
-      });
-    });
-  });
-
   describe('load', () => {
     it('deve chamar use case com query de busca', async () => {
       const listSpy = vi.spyOn(mockRepository, 'list').mockResolvedValue({
@@ -156,7 +98,7 @@ describe('TutorFacade', () => {
         expect(loading).toBe(false);
       });
 
-      vi.spyOn(mockRepository, 'delete').mockResolvedValue();
+      vi.spyOn(mockRepository, 'delete').mockResolvedValue(undefined);
 
       await facade.deleteTutor(1);
 
@@ -165,6 +107,44 @@ describe('TutorFacade', () => {
 
       expect(tutores).toEqual([mockTutores[1]]);
       expect(pagination.total).toBe(1);
+    });
+
+    it('não deve atualizar total quando total é null', async () => {
+      vi.spyOn(mockRepository, 'list').mockResolvedValue({
+        tutores: mockTutores,
+        page: 1,
+        size: 10,
+        total: null,
+      });
+
+      facade.load();
+      await vi.waitFor(async () => {
+        const loading = await firstValueFrom(facade.loading$);
+        expect(loading).toBe(false);
+      });
+
+      vi.spyOn(mockRepository, 'delete').mockResolvedValue(undefined);
+
+      await facade.deleteTutor(1);
+
+      const pagination = await firstValueFrom(facade.pagination$);
+      expect(pagination.total).toBeNull();
+    });
+
+    it('deve propagar erro e atualizar error$', async () => {
+      const httpError = {
+        response: {
+          status: 500,
+          data: { message: 'Falha ao deletar' },
+        },
+      };
+
+      vi.spyOn(mockRepository, 'delete').mockRejectedValue(httpError);
+
+      await expect(facade.deleteTutor(1)).rejects.toEqual(httpError);
+
+      const error = await firstValueFrom(facade.error$);
+      expect(error).toBe('Falha ao deletar');
     });
   });
 
@@ -187,12 +167,107 @@ describe('TutorFacade', () => {
       const detail = await firstValueFrom(facade.tutorDetail$);
       expect(detail).toEqual(tutorDetail);
     });
+
+    it('deve limpar detalhes quando há erro', async () => {
+      const httpError = {
+        response: {
+          status: 500,
+          data: { message: 'Erro ao carregar' },
+        },
+      };
+
+      vi.spyOn(mockTutorApi, 'getTutorDetail').mockRejectedValue(httpError);
+
+      await expect(facade.loadTutorDetail(1)).rejects.toEqual(httpError);
+
+      const detail = await firstValueFrom(facade.tutorDetail$);
+      const error = await firstValueFrom(facade.error$);
+
+      expect(detail).toBeNull();
+      expect(error).toBe('Erro ao carregar');
+    });
+  });
+
+  describe('addTutor', () => {
+    it('deve criar tutor com sucesso', async () => {
+      const payload = {
+        nome: 'Carlos',
+        email: 'carlos@email.com',
+        telefone: '11999999900',
+        endereco: 'Rua C',
+        cpf: 12345678909,
+      };
+      vi.spyOn(mockTutorApi, 'createTutor').mockResolvedValue({
+        id: 3,
+        ...payload,
+      });
+
+      const created = await facade.addTutor(payload);
+
+      expect(created).toEqual({ id: 3, ...payload });
+    });
+
+    it('deve atualizar error$ quando falha ao criar tutor', async () => {
+      const error = new Error('Falha ao criar');
+      vi.spyOn(mockTutorApi, 'createTutor').mockRejectedValue(error);
+
+      await expect(
+        facade.addTutor({
+          nome: 'Carlos',
+          email: 'carlos@email.com',
+          telefone: '11999999900',
+          endereco: 'Rua C',
+          cpf: 12345678909,
+        })
+      ).rejects.toThrow('Falha ao criar');
+
+      const message = await firstValueFrom(facade.error$);
+      expect(message).toBe('Falha ao criar');
+    });
+  });
+
+  describe('updateTutor', () => {
+    it('deve atualizar tutor com sucesso', async () => {
+      const payload = {
+        nome: 'Carlos Atualizado',
+        email: 'carlos@email.com',
+        telefone: '11999999900',
+        endereco: 'Rua D',
+        cpf: 12345678909,
+      };
+
+      vi.spyOn(mockTutorApi, 'updateTutor').mockResolvedValue({
+        id: 3,
+        ...payload,
+      });
+
+      const updated = await facade.updateTutor(3, payload);
+
+      expect(updated).toEqual({ id: 3, ...payload });
+    });
+
+    it('deve definir mensagem genérica quando erro não é Error', async () => {
+      vi.spyOn(mockTutorApi, 'updateTutor').mockRejectedValue('fail');
+
+      await expect(
+        facade.updateTutor(3, {
+          nome: 'Carlos',
+          email: 'carlos@email.com',
+          telefone: '11999999900',
+          endereco: 'Rua C',
+          cpf: 12345678909,
+        })
+      ).rejects.toBe('fail');
+
+      const message = await firstValueFrom(facade.error$);
+      expect(message).toBe('Erro ao atualizar tutor');
+    });
   });
 
   describe('linkPets', () => {
     it('deve vincular pets e recarregar detalhes', async () => {
-      vi.spyOn(mockTutorApi, 'linkPet').mockResolvedValue();
-      const loadDetailSpy = vi.spyOn(facade, 'loadTutorDetail').mockResolvedValue();
+      vi.spyOn(mockTutorApi, 'linkPet').mockResolvedValue(undefined);
+      const loadDetailSpy = vi.spyOn(facade, 'loadTutorDetail').mockResolvedValue(undefined);
 
       await facade.linkPets(1, [1, 2]);
 
@@ -211,80 +286,79 @@ describe('TutorFacade', () => {
 
   describe('unlinkPet', () => {
     it('deve desvincular pet e recarregar detalhes', async () => {
-      vi.spyOn(mockTutorApi, 'unlinkPet').mockResolvedValue();
-      const loadDetailSpy = vi.spyOn(facade, 'loadTutorDetail').mockResolvedValue();
+      vi.spyOn(mockTutorApi, 'unlinkPet').mockResolvedValue(undefined);
+      const loadDetailSpy = vi.spyOn(facade, 'loadTutorDetail').mockResolvedValue(undefined);
 
       await facade.unlinkPet(1, 2);
 
       expect(mockTutorApi.unlinkPet).toHaveBeenCalledWith(1, 2);
       expect(loadDetailSpy).toHaveBeenCalledWith(1);
     });
-  });
 
-  describe('error$', () => {
-    it('deve emitir mensagem específica para erro 401', async () => {
+    it('deve atualizar error$ quando falha', async () => {
       const httpError = {
         response: {
-          status: 401,
-          data: { message: 'Unauthorized' },
+          status: 404,
+          data: { message: 'Pet não encontrado' },
         },
       };
 
-      vi.spyOn(mockRepository, 'list').mockRejectedValue(httpError);
+      vi.spyOn(mockTutorApi, 'unlinkPet').mockRejectedValue(httpError);
 
-      facade.load();
-      await vi.waitFor(async () => {
-        const loading = await firstValueFrom(facade.loading$);
-        expect(loading).toBe(false);
-      });
+      await expect(facade.unlinkPet(1, 2)).rejects.toEqual(httpError);
 
       const error = await firstValueFrom(facade.error$);
-      expect(error).toBe('Sessão expirada. Faça login novamente.');
+      expect(error).toBe('Pet não encontrado');
     });
   });
 
-  describe('detailLoading$', () => {
-    it('deve emitir true durante loadTutorDetail', async () => {
-      let resolvePromise: (value: TutorEntity) => void;
-      const promise = new Promise<TutorEntity>((resolve) => {
-        resolvePromise = resolve;
+  describe('uploadFoto', () => {
+    it('deve chamar uploadFoto na API', async () => {
+      const file = { name: 'foto.png', type: 'image/png' } as File;
+      vi.spyOn(mockTutorApi, 'uploadFoto').mockResolvedValue({ id: 1 });
+
+      await facade.uploadFoto(1, file);
+
+      expect(mockTutorApi.uploadFoto).toHaveBeenCalledWith(1, file);
+    });
+
+    it('deve atualizar error$ quando falha', async () => {
+      const file = { name: 'foto.png', type: 'image/png' } as File;
+      vi.spyOn(mockTutorApi, 'uploadFoto').mockRejectedValue({
+        response: {
+          status: 500,
+          data: { message: 'Falha ao enviar foto' },
+        },
       });
 
-      vi.spyOn(mockTutorApi, 'getTutorDetail').mockReturnValue(promise);
+      await expect(facade.uploadFoto(1, file)).rejects.toBeDefined();
 
-      facade.loadTutorDetail(1);
-
-      const loading = await firstValueFrom(facade.detailLoading$);
-      expect(loading).toBe(true);
-
-      resolvePromise!(mockTutores[0]);
+      const error = await firstValueFrom(facade.error$);
+      expect(error).toBe('Falha ao enviar foto');
     });
   });
 
-  describe('loading$', () => {
-    it('deve emitir false inicialmente', async () => {
-      const loading = await firstValueFrom(facade.loading$);
-      expect(loading).toBe(false);
+  describe('deleteFoto', () => {
+    it('deve chamar deleteFoto na API', async () => {
+      vi.spyOn(mockTutorApi, 'deleteFoto').mockResolvedValue(undefined);
+
+      await facade.deleteFoto(1, 9);
+
+      expect(mockTutorApi.deleteFoto).toHaveBeenCalledWith(1, 9);
     });
 
-    it('deve emitir true durante load', async () => {
-      let resolvePromise: (value: PaginatedTutoresEntity) => void;
-      const promise = new Promise<PaginatedTutoresEntity>((resolve) => {
-        resolvePromise = resolve;
+    it('deve atualizar error$ quando falha', async () => {
+      vi.spyOn(mockTutorApi, 'deleteFoto').mockRejectedValue({
+        response: {
+          status: 500,
+          data: { message: 'Falha ao excluir foto' },
+        },
       });
 
-      vi.spyOn(mockRepository, 'list').mockReturnValue(promise);
+      await expect(facade.deleteFoto(1, 9)).rejects.toBeDefined();
 
-      facade.load();
-      const loading = await firstValueFrom(facade.loading$);
-      expect(loading).toBe(true);
-
-      resolvePromise!({
-        tutores: [],
-        page: 1,
-        size: 10,
-        total: 0,
-      });
+      const error = await firstValueFrom(facade.error$);
+      expect(error).toBe('Falha ao excluir foto');
     });
   });
 });

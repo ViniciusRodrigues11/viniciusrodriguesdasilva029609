@@ -31,7 +31,7 @@ export class TutorFacade {
   private readonly errorSubject = new BehaviorSubject<string | null>(null);
   private readonly paginationSubject = new BehaviorSubject<TutorPaginationState>({
     page: 1,
-    pageSize: 9,
+    pageSize: 10,
     total: null,
   });
   private readonly tutorDetailSubject = new BehaviorSubject<TutorDetail | null>(null);
@@ -194,22 +194,6 @@ export class TutorFacade {
   clearTutorDetail(): void {
     this.tutorDetailSubject.next(null);
     this.errorSubject.next(null);
-  }
-
-  async linkPet(tutorId: number, petId: number): Promise<void> {
-    this.loadingSubject.next(true);
-    this.errorSubject.next(null);
-
-    try {
-      await this.tutorApi.linkPet(tutorId, petId);
-      // Recarrega os detalhes do tutor para atualizar a lista de pets
-      await this.loadTutorDetail(tutorId);
-    } catch (error) {
-      this.errorSubject.next(this.extractErrorMessage(error));
-      throw error;
-    } finally {
-      this.loadingSubject.next(false);
-    }
   }
 
   async linkPets(tutorId: number, petIds: number[]): Promise<void> {
