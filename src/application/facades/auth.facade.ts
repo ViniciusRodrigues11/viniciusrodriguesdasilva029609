@@ -86,19 +86,13 @@ export class AuthFacade {
     }
 
     this.refreshTokenUseCase.execute(refreshToken).subscribe((refreshState: RefreshTokenState) => {
-      this.updateAuthState({
-        isLoading: refreshState.isLoading,
-        error: refreshState.error,
-        isAuthenticated: !refreshState.error && !refreshState.isLoading,
-      });
-
-      // Se houve erro no refresh, fazer logout
       if (refreshState.error) {
+        this.updateAuthState({
+          isLoading: false,
+          error: refreshState.error,
+        });
         this.logout();
-      }
-
-      // Reagendar próximo refresh após sucesso
-      if (!refreshState.error && !refreshState.isLoading) {
+      } else if (!refreshState.isLoading) {
         this.scheduleTokenRefresh();
       }
     });
