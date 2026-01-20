@@ -89,7 +89,7 @@ const validators = {
   ),
   password: createValidator(
     _isRequired,
-    _minLength(6)
+    _minLength(5)
   ),
   cpf: createValidator(
     _isRequired,

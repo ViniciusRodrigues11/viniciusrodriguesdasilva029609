@@ -7,6 +7,7 @@ interface ModalProps {
   description?: string;
   onClose: () => void;
   children: React.ReactNode;
+  footer?: React.ReactNode;
   size?: "sm" | "md" | "lg";
   closeButtonLabel?: string;
   isDismissible?: boolean;
@@ -18,6 +19,7 @@ export function Modal({
   description,
   onClose,
   children,
+  footer,
   isDismissible = true,
 }: ModalProps) {
   useEffect(() => {
@@ -55,10 +57,10 @@ export function Modal({
       />
 
       <div
-        className={`relative md:w-100 md:h-fit h-screen w-full rounded-lg bg-white shadow-xl`}
+        className={`relative md:w-100 md:h-150 h-screen w-full rounded-lg bg-white shadow-xl md:max-h-[90vh] flex flex-col`}
       >
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-slate-200 px-6 py-4">
+        <div className="flex items-start justify-between border-b border-slate-200 px-6 py-4 shrink-0">
           <div className="flex-1 pr-4">
             <h2 className="text-lg font-bold text-slate-900">{title}</h2>
             {description && (
@@ -79,7 +81,10 @@ export function Modal({
         </div>
 
         {/* Content */}
-        <div className="px-6 py-6">{children}</div>
+        <div className="px-6 py-6 overflow-y-auto flex-1">{children}</div>
+
+        {/* Footer */}
+        {footer && <div className="shrink-0">{footer}</div>}
       </div>
     </div>
   );
