@@ -32,7 +32,7 @@ export class PetFacade {
   private readonly errorSubject = new BehaviorSubject<string | null>(null);
   private readonly paginationSubject = new BehaviorSubject<PetPaginationState>({
     page: 1,
-    pageSize: 9,
+    pageSize: 10,
     total: null,
   });
   private readonly petDetailSubject = new BehaviorSubject<PetDetail | null>(null);

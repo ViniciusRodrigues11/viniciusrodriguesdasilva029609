@@ -32,7 +32,7 @@ describe('PetFacade', () => {
     };
 
     mockListPetsUseCase = new ListPetsUseCase(mockRepository);
-    facade = new PetFacade(mockListPetsUseCase);
+    facade = new PetFacade(mockListPetsUseCase, {} as any);
   });
 
   describe('pets$', () => {
@@ -245,7 +245,7 @@ describe('PetFacade', () => {
       // Assert
       expect(pagination).toEqual({
         page: 1,
-        pageSize: 9,
+        pageSize: 10,
         total: null,
       });
     });
