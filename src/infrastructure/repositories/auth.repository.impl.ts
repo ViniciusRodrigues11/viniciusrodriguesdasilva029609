@@ -12,7 +12,6 @@ export class AuthRepositoryImpl implements IAuthRepository {
     this.tokenStorage = tokenStorage;
   }
 
-
   // Login e persistência de tokens
   async login(credentials: CredentialsEntity): Promise<AuthEntity> {
     const auth = await this.authApi.login(credentials);
