@@ -52,11 +52,21 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         <div
           className="fixed inset-0 bg-black/50 z-80 lg:hidden"
           onClick={onClose}
+          role="button"
+          aria-label="Fechar menu lateral"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              onClose();
+            }
+          }}
         />
       )}
 
       {/* Sidebar */}
       <aside
+        id="sidebar-navigation"
+        aria-label="Menu de navegação principal"
         className={`
           fixed lg:static inset-y-0 left-0 z-90
           w-64 bg-white text-slate-900 h-screen
@@ -77,7 +87,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             {/* Botão fechar (apenas mobile) */}
             <button
               onClick={onClose}
-              className="lg:hidden p-2 hover:bg-slate-100 rounded-lg transition-colors"
+              className="lg:hidden cursor-pointer p-2 hover:bg-slate-100 rounded-lg transition-colors"
               aria-label="Fechar menu"
             >
               <X className="w-5 h-5" />
@@ -86,7 +96,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 lg:overflow-hidden overflow-y-auto">
+        <nav
+          aria-label="Menu principal"
+          className="flex-1 p-4 lg:overflow-hidden overflow-y-auto"
+        >
           <ul className="space-y-2">
             {menuItems.map((item) => (
               <li key={item.path}>
@@ -112,16 +125,16 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           <div className="flex flex-col gap-2">
             <button
               onClick={() => navigate("/health")}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-slate-700 hover:bg-slate-100 w-full"
-              title="Health Check"
+              className="flex cursor-pointer items-center gap-3 px-4 py-3 rounded-lg transition-colors text-slate-700 hover:bg-slate-100 w-full"
+              aria-label="Acessar página de Health Check"
             >
               <Settings className="w-5 h-5" />
               <span className="font-medium">Health</span>
             </button>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-red-600 hover:bg-red-50 w-full"
-              title="Sair do sistema"
+              className="flex cursor-pointer items-center gap-3 px-4 py-3 rounded-lg transition-colors text-red-600 hover:bg-red-50 w-full"
+              aria-label="Sair do sistema"
             >
               <LogOut className="w-5 h-5" />
               <span className="font-medium">Sair</span>
