@@ -65,30 +65,32 @@ export function Card({
           <button
             type="button"
             onClick={handleClick}
-            aria-label="Ver detalhes"
+            aria-label={`Ver detalhes de ${title}`}
             className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md border border-white bg-indigo-50 px-3 py-2 text-xs font-medium text-indigo-700 transition hover:bg-indigo-100 hover:border-indigo-400"
           >
             Ver
-            <ChevronRight className="h-3.5 w-3.5" />
+            <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
         )}
         <button
           type="button"
           onClick={handleEdit}
-          aria-label="Editar"
+          aria-label={`Editar ${title}`}
+          title={!onEdit ? "Edição não disponível" : undefined}
           className="flex items-center cursor-pointer justify-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-50 hover:border-slate-400 disabled:cursor-not-allowed"
           disabled={!onEdit}
         >
-          <Edit2 className="h-3.5 w-3.5" />
+          <Edit2 className="h-3.5 w-3.5" aria-hidden="true" />
         </button>
         <button
           type="button"
           onClick={handleDelete}
-          aria-label="Excluir"
+          aria-label={`Excluir ${title}`}
+          title={!onDelete ? "Exclusão não disponível" : undefined}
           className="flex items-center cursor-pointer justify-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-red-100 hover:text-red-600 hover:border-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={!onDelete}
         >
-          <Trash2 className="h-3.5 w-3.5" />
+          <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
         </button>
       </div>
     );

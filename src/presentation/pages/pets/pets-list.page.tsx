@@ -18,9 +18,19 @@ import type { PetEntity } from "../../../domain/entities/pet.entity";
 const PAGE_SIZE = 12;
 const SEARCH_DEBOUNCE = 700;
 
+function useDebouncedValue<T>(value: T, delay: number) {
+  const [debounced, setDebounced] = useState(value);
+
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(id);
+  }, [value, delay]);
+
+  return debounced;
+}
+
 export function PetsListPage() {
   const navigate = useNavigate();
-  const hasLoadedRef = useRef(false);
 
   const pets = useObservable<PetEntity[]>(petFacade.pets$, []);
   const loading = useObservable<boolean>(petFacade.loading$, false);
@@ -32,81 +42,72 @@ export function PetsListPage() {
   });
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const debouncedQuery = useDebouncedValue(searchTerm.trim(), SEARCH_DEBOUNCE);
+
   const [petToDelete, setPetToDelete] = useState<PetEntity | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [petToEdit, setPetToEdit] = useState<PetEntity | null>(null);
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedQuery(searchTerm);
-    }, SEARCH_DEBOUNCE);
+  const loadPage = (page: number, query = debouncedQuery) => {
+    petFacade.load(page, PAGE_SIZE, query);
+  };
 
-    return () => clearTimeout(handler);
-  }, [searchTerm]);
+  const clampPage = (page: number) => {
+    if (pagination.total == null) return Math.max(1, page);
+
+    const totalPages = Math.max(1, Math.ceil(pagination.total / PAGE_SIZE));
+    return Math.max(1, Math.min(page, totalPages));
+  };
+
+  const prevQueryRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
-    if (!hasLoadedRef.current) {
-      hasLoadedRef.current = true;
-      petFacade.load(1, PAGE_SIZE, debouncedQuery);
-    }
+    if (prevQueryRef.current === debouncedQuery) return;
+    prevQueryRef.current = debouncedQuery;
+    loadPage(1, debouncedQuery);
   }, [debouncedQuery]);
 
-  const handlePrevPage = () => {
-    const prevPage = Math.max(1, pagination.page - 1);
-    petFacade.load(prevPage, PAGE_SIZE, debouncedQuery);
-  };
-
-  const handleNextPage = () => {
-    petFacade.load(pagination.page + 1, PAGE_SIZE, debouncedQuery);
-  };
-
-  const handlePageChange = (page: number) => {
-    const targetPage = Math.max(
-      1,
-      Math.min(page, Math.ceil((pagination.total ?? 0) / PAGE_SIZE) || page),
-    );
-    petFacade.load(targetPage, PAGE_SIZE, debouncedQuery);
-  };
+  const handlePrevPage = () => loadPage(clampPage(pagination.page - 1));
+  const handleNextPage = () => loadPage(clampPage(pagination.page + 1));
+  const handlePageChange = (page: number) => loadPage(clampPage(page));
 
   const goToPetDetail = (petId: number) => {
     navigate(`/pets/${petId}`);
   };
 
-  const handlePetAdded = () => {
-    petFacade.load(1, PAGE_SIZE, debouncedQuery);
-  };
+  const handlePetAdded = () => loadPage(1);
 
   const handleDeleteClick = (petId: number) => {
     const pet = pets.find((p) => p.id === petId);
-    if (pet) {
-      setPetToDelete(pet);
-    }
+    if (pet) setPetToDelete(pet);
   };
 
   const handleEditClick = (petId: number) => {
     const pet = pets.find((p) => p.id === petId);
-    if (pet) {
-      setPetToEdit(pet);
-    }
+    if (pet) setPetToEdit(pet);
   };
 
   const handleConfirmDelete = async () => {
     if (!petToDelete) return;
 
     setIsDeleting(true);
+    const deletingId = petToDelete.id;
+
     try {
-      await petFacade.deletePet(petToDelete.id);
+      await petFacade.deletePet(deletingId);
       setPetToDelete(null);
 
-      // Se a página atual ficou vazia, volta pra página anterior
-      const currentPets = pets.filter((p) => p.id !== petToDelete.id);
-      if (currentPets.length === 0 && pagination.page > 1) {
-        petFacade.load(pagination.page - 1, PAGE_SIZE, debouncedQuery);
-      }
-    } catch (error) {
+      // Se a página ficaria vazia após remover 1 item, volta uma página.
+      const wouldBeEmpty = pets.length === 1;
+      const targetPage =
+        wouldBeEmpty && pagination.page > 1
+          ? pagination.page - 1
+          : pagination.page;
+
+      loadPage(targetPage);
+    } catch (err) {
       // Erro já tratado pela facade
-      console.error("Erro ao excluir pet:", error);
+      console.error("Erro ao excluir pet:", err);
     } finally {
       setIsDeleting(false);
     }
@@ -118,11 +119,11 @@ export function PetsListPage() {
 
   const handlePetUpdated = () => {
     setPetToEdit(null);
-    petFacade.load(pagination.page, PAGE_SIZE, debouncedQuery);
+    loadPage(pagination.page);
   };
 
   const hasNextPage = useMemo(() => {
-    if (pagination.total && pagination.total > 0) {
+    if (pagination.total != null && pagination.total > 0) {
       const totalPages = Math.ceil(pagination.total / pagination.pageSize);
       return pagination.page < totalPages;
     }
@@ -143,7 +144,7 @@ export function PetsListPage() {
           <SearchInput
             value={searchTerm}
             onChange={setSearchTerm}
-            onSearch={() => setDebouncedQuery(searchTerm.trim())}
+            onSearch={() => setSearchTerm((v) => v.trim())}
             placeholder="Buscar por nome"
             className="md:max-w-72 max-w-52"
           />
@@ -178,9 +179,7 @@ export function PetsListPage() {
           pet={petToEdit}
           isOpen={!!petToEdit}
           onOpenChange={(open) => {
-            if (!open) {
-              setPetToEdit(null);
-            }
+            if (!open) setPetToEdit(null);
           }}
           onSuccess={handlePetUpdated}
         />

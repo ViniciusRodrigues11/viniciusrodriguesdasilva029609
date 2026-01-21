@@ -89,27 +89,32 @@ export function Pagination({
   }, [scrollContainerRef, scrollContainerSelector, bottomThresholdPx]);
 
   return (
-    <div
+    <nav
+      aria-label="Paginação"
       className={`flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 transition-all ${
         !isAtBottom
           ? "fixed bottom-4 left-1/2 z-40 w-[90%] -translate-x-1/2 shadow-md md:sticky md:bottom-4 md:left-auto md:translate-x-0 md:max-w-md self-end"
           : "relative w-full shadow-sm mt-4 md:mt-0"
       }`}
     >
-      <div className="text-sm text-slate-600">
-        {currentPage}
+      <div
+        className="text-sm text-slate-600"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        Página {currentPage}
         {totalPages !== null ? ` de ${totalPages}` : null}
       </div>
 
       <div className="flex items-center gap-1.5">
         <button
           type="button"
-          aria-label="Página anterior"
+          aria-label={`Ir para página ${currentPage - 1}`}
           onClick={onPreviousPage}
           disabled={currentPage <= 1 || isLoading}
           className="rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          <ChevronLeft className="inline-block h-4 w-4" />
+          <ChevronLeft className="inline-block h-4 w-4" aria-hidden="true" />
         </button>
 
         {pageNumbers.map((item, index) =>
@@ -141,14 +146,14 @@ export function Pagination({
 
         <button
           type="button"
-          aria-label="Próxima página"
+          aria-label={`Ir para página ${currentPage + 1}`}
           onClick={onNextPage}
           disabled={!derivedHasNextPage || isLoading}
           className="rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          <ChevronRight className="inline-block h-4 w-4" />
+          <ChevronRight className="inline-block h-4 w-4" aria-hidden="true" />
         </button>
       </div>
-    </div>
+    </nav>
   );
 }

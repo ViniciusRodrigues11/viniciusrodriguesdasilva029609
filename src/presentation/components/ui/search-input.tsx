@@ -26,11 +26,14 @@ export function SearchInput({
   };
 
   return (
-    <div className={className}>
+    <div className={className} role="search">
       <label className="sr-only" htmlFor="search">
         {placeholder}
       </label>
       <div className="relative">
+        <div id="search-hint" className="sr-only">
+          Pressione Enter para buscar
+        </div>
         <input
           id="search"
           type="text"
@@ -38,6 +41,7 @@ export function SearchInput({
           onChange={(event) => onChange(event.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
+          aria-describedby="search-hint"
           className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 pr-10 text-sm shadow-sm transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
         />
         {value && (
@@ -47,7 +51,7 @@ export function SearchInput({
             className="absolute right-10 top-2.5 text-slate-400 hover:text-slate-600 transition-colors"
             aria-label="Limpar busca"
           >
-            <X size={16} />
+            <X size={16} aria-hidden="true" />
           </button>
         )}
         <span

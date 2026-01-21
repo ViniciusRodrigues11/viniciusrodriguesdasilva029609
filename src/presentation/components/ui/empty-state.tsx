@@ -10,11 +10,13 @@ export function EmptyState({
   className = "",
 }: EmptyStateProps) {
   return (
-    <div
+    <section
+      role="status"
+      aria-live="polite"
       className={`p-8 text-center text-slate-600 flex self-center flex-col items-center gap-4 ${className}`}
     >
       <img src={imageSrc} alt="" className="w-30" />
-      <p className="text-xl">{message}</p>
-    </div>
+      <h2 className="text-xl font-semibold">{message}</h2>
+    </section>
   );
 }

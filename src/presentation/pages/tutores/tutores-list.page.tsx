@@ -18,9 +18,19 @@ import { PawPrintLoader } from "../../components/ui/paw-print-loader";
 const PAGE_SIZE = 12;
 const SEARCH_DEBOUNCE = 700;
 
+function useDebouncedValue<T>(value: T, delay: number) {
+  const [debounced, setDebounced] = useState(value);
+
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(id);
+  }, [value, delay]);
+
+  return debounced;
+}
+
 export function TutoresListPage() {
   const navigate = useNavigate();
-  const hasLoadedRef = useRef(false);
 
   const tutores = useObservable<TutorEntity[]>(tutorFacade.tutores$, []);
   const loading = useObservable<boolean>(tutorFacade.loading$, false);
@@ -35,79 +45,70 @@ export function TutoresListPage() {
   );
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const debouncedQuery = useDebouncedValue(searchTerm.trim(), SEARCH_DEBOUNCE);
+
   const [tutorToDelete, setTutorToDelete] = useState<TutorEntity | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [tutorToEdit, setTutorToEdit] = useState<TutorEntity | null>(null);
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedQuery(searchTerm);
-    }, SEARCH_DEBOUNCE);
+  const loadPage = (page: number, query = debouncedQuery) => {
+    tutorFacade.load(page, PAGE_SIZE, query);
+  };
 
-    return () => clearTimeout(handler);
-  }, [searchTerm]);
+  const clampPage = (page: number) => {
+    if (pagination.total == null) return Math.max(1, page);
+
+    const totalPages = Math.max(1, Math.ceil(pagination.total / PAGE_SIZE));
+    return Math.max(1, Math.min(page, totalPages));
+  };
+
+  const prevQueryRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
-    if (!hasLoadedRef.current) {
-      hasLoadedRef.current = true;
-      tutorFacade.load(1, PAGE_SIZE, debouncedQuery);
-    }
+    if (prevQueryRef.current === debouncedQuery) return;
+    prevQueryRef.current = debouncedQuery;
+    loadPage(1, debouncedQuery);
   }, [debouncedQuery]);
 
-  const handlePrevPage = () => {
-    const prevPage = Math.max(1, pagination.page - 1);
-    tutorFacade.load(prevPage, PAGE_SIZE, debouncedQuery);
-  };
-
-  const handleNextPage = () => {
-    tutorFacade.load(pagination.page + 1, PAGE_SIZE, debouncedQuery);
-  };
-
-  const handlePageChange = (page: number) => {
-    const targetPage = Math.max(
-      1,
-      Math.min(page, Math.ceil((pagination.total ?? 0) / PAGE_SIZE) || page),
-    );
-    tutorFacade.load(targetPage, PAGE_SIZE, debouncedQuery);
-  };
+  const handlePrevPage = () => loadPage(clampPage(pagination.page - 1));
+  const handleNextPage = () => loadPage(clampPage(pagination.page + 1));
+  const handlePageChange = (page: number) => loadPage(clampPage(page));
 
   const goToTutorDetail = (tutorId: number) => {
     navigate(`/tutores/${tutorId}`);
   };
 
-  const handleTutorAdded = () => {
-    tutorFacade.load(1, PAGE_SIZE, debouncedQuery);
-  };
+  const handleTutorAdded = () => loadPage(1);
 
   const handleDeleteClick = (tutorId: number) => {
     const tutor = tutores.find((t) => t.id === tutorId);
-    if (tutor) {
-      setTutorToDelete(tutor);
-    }
+    if (tutor) setTutorToDelete(tutor);
   };
 
   const handleEditClick = (tutorId: number) => {
     const tutor = tutores.find((t) => t.id === tutorId);
-    if (tutor) {
-      setTutorToEdit(tutor);
-    }
+    if (tutor) setTutorToEdit(tutor);
   };
 
   const handleConfirmDelete = async () => {
     if (!tutorToDelete) return;
 
     setIsDeleting(true);
+    const deletingId = tutorToDelete.id;
+
     try {
-      await tutorFacade.deleteTutor(tutorToDelete.id);
+      await tutorFacade.deleteTutor(deletingId);
       setTutorToDelete(null);
 
-      const remainingTutores = tutores.filter((t) => t.id !== tutorToDelete.id);
-      if (remainingTutores.length === 0 && pagination.page > 1) {
-        tutorFacade.load(pagination.page - 1, PAGE_SIZE, debouncedQuery);
-      }
-    } catch (error) {
-      console.error("Erro ao excluir tutor:", error);
+      const wouldBeEmpty = tutores.length === 1;
+      const targetPage =
+        wouldBeEmpty && pagination.page > 1
+          ? pagination.page - 1
+          : pagination.page;
+
+      loadPage(targetPage);
+    } catch (err) {
+      console.error("Erro ao excluir tutor:", err);
     } finally {
       setIsDeleting(false);
     }
@@ -119,11 +120,11 @@ export function TutoresListPage() {
 
   const handleTutorUpdated = () => {
     setTutorToEdit(null);
-    tutorFacade.load(pagination.page, PAGE_SIZE, debouncedQuery);
+    loadPage(pagination.page);
   };
 
   const hasNextPage = useMemo(() => {
-    if (pagination.total && pagination.total > 0) {
+    if (pagination.total != null && pagination.total > 0) {
       const totalPages = Math.ceil(pagination.total / pagination.pageSize);
       return pagination.page < totalPages;
     }
@@ -144,7 +145,7 @@ export function TutoresListPage() {
           <SearchInput
             value={searchTerm}
             onChange={setSearchTerm}
-            onSearch={() => setDebouncedQuery(searchTerm.trim())}
+            onSearch={() => setSearchTerm((v) => v.trim())}
             placeholder="Buscar por nome"
             className="md:max-w-72 max-w-52"
           />
@@ -180,9 +181,7 @@ export function TutoresListPage() {
           tutor={tutorToEdit}
           isOpen={!!tutorToEdit}
           onOpenChange={(open) => {
-            if (!open) {
-              setTutorToEdit(null);
-            }
+            if (!open) setTutorToEdit(null);
           }}
           onSuccess={handleTutorUpdated}
         />
