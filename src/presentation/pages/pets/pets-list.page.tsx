@@ -8,6 +8,7 @@ import {
 import { Pagination } from "../../components/ui/pagination";
 import { SearchInput } from "../../components/ui/search-input";
 import { EmptyState } from "../../components/ui/empty-state";
+import { PawPrintLoader } from "../../components/ui/paw-print-loader";
 import { ActionModal } from "../../components/action-modal/action-modal";
 import { useObservable } from "../../hooks/use-observable.hook";
 import { petFacade } from "../../../services/pet.service";
@@ -152,11 +153,7 @@ export function PetsListPage() {
           <AddPetModal onPetAdded={handlePetAdded} />
         </div>
 
-        {loading && (
-          <div className="rounded-lg border border-slate-200 bg-white p-6 text-center text-slate-700 shadow-sm">
-            Carregando pets...
-          </div>
-        )}
+        {loading && <PawPrintLoader />}
 
         {error && (
           <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 shadow-sm">
@@ -209,7 +206,7 @@ export function PetsListPage() {
           </p>
         </ActionModal>
 
-        {!isEmptyState && (
+        {(!isEmptyState || !loading) && (
           <Pagination
             currentPage={pagination.page}
             pageSize={pagination.pageSize}

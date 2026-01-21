@@ -71,7 +71,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         <div className="p-6 border-b border-slate-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Home className="w-6 h-6 text-blue-600" />
+              <Home className="w-6 h-6 text-indigo-600" />
               <h1 className="text-xl font-bold">MeuPet</h1>
             </div>
             {/* Botão fechar (apenas mobile) */}
@@ -95,7 +95,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                   onClick={() => onClose()}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                     isActive(item.path)
-                      ? "bg-blue-600 text-white"
+                      ? "bg-indigo-600 text-white"
                       : "text-slate-700 hover:bg-slate-100"
                   }`}
                 >

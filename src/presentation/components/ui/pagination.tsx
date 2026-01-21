@@ -122,7 +122,7 @@ export function Pagination({
               aria-current={item === currentPage ? "page" : undefined}
               className={`min-w-9 rounded-md border px-2.5 py-1.5 text-sm font-medium transition ${
                 item === currentPage
-                  ? "border-blue-500 bg-blue-50 text-blue-700"
+                  ? "border-indigo-500 bg-indigo-50 text-indigo-700"
                   : "border-slate-200 text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
               }`}
             >

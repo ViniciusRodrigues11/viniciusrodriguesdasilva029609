@@ -13,6 +13,7 @@ import { useObservable } from "../../hooks/use-observable.hook";
 import { tutorFacade } from "../../../services/tutor.service";
 import type { TutorPaginationState } from "../../../application/facades/tutor.facade";
 import type { TutorEntity } from "../../../domain/entities/tutor.entity";
+import { PawPrintLoader } from "../../components/ui/paw-print-loader";
 
 const PAGE_SIZE = 12;
 const SEARCH_DEBOUNCE = 700;
@@ -152,11 +153,7 @@ export function TutoresListPage() {
           <AddTutorModal onTutorAdded={handleTutorAdded} />
         </div>
 
-        {loading && (
-          <div className="rounded-lg border border-slate-200 bg-white p-6 text-center text-slate-700 shadow-sm">
-            Carregando tutores...
-          </div>
-        )}
+        {loading && <PawPrintLoader />}
 
         {error && (
           <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 shadow-sm">

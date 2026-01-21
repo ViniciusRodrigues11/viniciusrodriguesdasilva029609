@@ -114,7 +114,7 @@ export function ImageDragArea({
         className={`
           relative border-2 border-dashed rounded-lg p-6 text-center cursor-pointer
           transition-all duration-200 ease-in-out
-          ${isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400"}
+          ${isDragging ? "border-indigo-500 bg-indigo-50" : "border-gray-300 hover:border-gray-400"}
           ${error ? "border-red-500 bg-red-50" : ""}
         `}
       >
@@ -175,7 +175,7 @@ export function ImageDragArea({
               />
             </svg>
             <div className="text-sm text-gray-600">
-              <span className="font-semibold text-blue-600 hover:text-blue-500">
+              <span className="font-semibold text-indigo-600 hover:text-indigo-500">
                 Clique para selecionar
               </span>{" "}
               ou arraste uma imagem
