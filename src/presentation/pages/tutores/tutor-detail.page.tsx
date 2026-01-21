@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { tutorFacade } from "../../../services/tutor.service";
 import { useObservable } from "../../hooks/use-observable.hook";
@@ -12,6 +12,7 @@ import { BackButton } from "../../components/back-button";
 export function TutorDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const hasInitialized = useRef(false);
 
   const tutorDetail = useObservable<TutorDetail | null>(
     tutorFacade.tutorDetail$,
@@ -28,7 +29,8 @@ export function TutorDetailPage() {
   const [isUnlinking, setIsUnlinking] = useState(false);
 
   useEffect(() => {
-    if (id) {
+    if (id && !hasInitialized.current) {
+      hasInitialized.current = true;
       const tutorId = parseInt(id, 10);
       tutorFacade.loadTutorDetail(tutorId).catch((err) => {
         console.error("Erro ao carregar detalhes do tutor:", err);

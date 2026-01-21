@@ -46,9 +46,7 @@ export function PetsListPage() {
   }, [searchTerm]);
 
   useEffect(() => {
-    if (hasLoadedRef.current) {
-      petFacade.load(1, PAGE_SIZE, debouncedQuery);
-    } else {
+    if (!hasLoadedRef.current) {
       hasLoadedRef.current = true;
       petFacade.load(1, PAGE_SIZE, debouncedQuery);
     }

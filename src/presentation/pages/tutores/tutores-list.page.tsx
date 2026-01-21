@@ -49,9 +49,7 @@ export function TutoresListPage() {
   }, [searchTerm]);
 
   useEffect(() => {
-    if (hasLoadedRef.current) {
-      tutorFacade.load(1, PAGE_SIZE, debouncedQuery);
-    } else {
+    if (!hasLoadedRef.current) {
       hasLoadedRef.current = true;
       tutorFacade.load(1, PAGE_SIZE, debouncedQuery);
     }

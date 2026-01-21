@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, useRef, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { PawPrint, Users, Sparkles, ArrowRight } from "lucide-react";
 import { petFacade } from "../../../services/pet.service";
@@ -15,6 +15,7 @@ const formatCount = (value: number | null) =>
 export function HomePage() {
   const [stats, setStats] = useState<StatsState>({ pets: null, tutores: null });
   const [loading, setLoading] = useState<boolean>(true);
+  const hasInitialized = useRef(false);
   const petImages = [
     "/pets/pet1.webp",
     "/pets/pet2.webp",
@@ -27,7 +28,8 @@ export function HomePage() {
   ];
 
   useEffect(() => {
-    let isMounted = true;
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
 
     const fetchStats = async () => {
       setLoading(true);
@@ -38,22 +40,15 @@ export function HomePage() {
           tutorFacade.getTotalCount(),
         ]);
 
-        if (!isMounted) return;
         setStats({ pets: petsTotal, tutores: tutoresTotal });
       } catch {
-        if (!isMounted) return;
+        // Erro tratado silenciosamente
       } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     };
 
     fetchStats();
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   return (
@@ -108,8 +103,8 @@ export function HomePage() {
             title="Tutores registrados"
             description="Pessoas vinculadas e prontas para contato"
             value={formatCount(stats.tutores)}
-            icon={<Users className="h-5 w-5 text-emerald-600" />}
-            accent="bg-emerald-50"
+            icon={<Users className="h-5 w-5 text-indigo-600" />}
+            accent="bg-indigo-50"
             loading={loading}
           />
         </section>

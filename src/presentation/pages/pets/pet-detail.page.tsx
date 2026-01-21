@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { petFacade } from "../../../services/pet.service";
 import { useObservable } from "../../hooks/use-observable.hook";
@@ -9,13 +9,15 @@ import { BackButton } from "../../components/back-button";
 export function PetDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const hasInitialized = useRef(false);
 
   const petDetail = useObservable<PetDetail | null>(petFacade.petDetail$, null);
   const loading = useObservable<boolean>(petFacade.detailLoading$, false);
   const error = useObservable<string | null>(petFacade.error$, null);
 
   useEffect(() => {
-    if (id) {
+    if (id && !hasInitialized.current) {
+      hasInitialized.current = true;
       const petId = parseInt(id, 10);
       petFacade.loadPetDetail(petId).catch((err) => {
         console.error("Erro ao carregar detalhes do pet:", err);
@@ -127,7 +129,8 @@ export function PetDetailPage() {
             {petDetail.tutores.map((tutor) => (
               <div
                 key={tutor.id}
-                className="rounded-lg border border-slate-200 p-4 hover:border-slate-300 transition-colors"
+                className="rounded-lg border border-slate-200 p-4 hover:border-slate-300 transition-colors cursor-pointer"
+                onClick={() => navigate(`/tutores/${tutor.id}`)}
               >
                 <div className="flex gap-4">
                   {tutor.foto ? (
