@@ -197,7 +197,7 @@ export function PetsListPage() {
           </p>
         </ActionModal>
 
-        {(!isEmptyState || !loading) && (
+        {!isEmptyState && (
           <Pagination
             currentPage={pagination.page}
             pageSize={pagination.pageSize}
