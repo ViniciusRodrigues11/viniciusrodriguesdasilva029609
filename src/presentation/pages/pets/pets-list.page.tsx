@@ -11,23 +11,18 @@ import { EmptyState } from "../../components/ui/empty-state";
 import { PawPrintLoader } from "../../components/ui/paw-print-loader";
 import { ActionModal } from "../../components/action-modal/action-modal";
 import { useObservable } from "../../hooks/use-observable.hook";
+import { useDebouncedValue } from "../../hooks/use-debounced-value.hook";
 import { petFacade } from "../../../services/pet.service";
 import type { PetPaginationState } from "../../../application/facades/pet.facade";
 import type { PetEntity } from "../../../domain/entities/pet.entity";
-
-const PAGE_SIZE = 12;
-const SEARCH_DEBOUNCE = 700;
-
-function useDebouncedValue<T>(value: T, delay: number) {
-  const [debounced, setDebounced] = useState(value);
-
-  useEffect(() => {
-    const id = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(id);
-  }, [value, delay]);
-
-  return debounced;
-}
+import {
+  clampPage,
+  calculateHasNextPage,
+} from "../../helpers/pagination.helper";
+import {
+  PAGE_SIZE,
+  SEARCH_DEBOUNCE_MS,
+} from "../../constants/pagination.constants";
 
 export function PetsListPage() {
   const navigate = useNavigate();
@@ -42,7 +37,10 @@ export function PetsListPage() {
   });
 
   const [searchTerm, setSearchTerm] = useState("");
-  const debouncedQuery = useDebouncedValue(searchTerm.trim(), SEARCH_DEBOUNCE);
+  const debouncedQuery = useDebouncedValue(
+    searchTerm.trim(),
+    SEARCH_DEBOUNCE_MS,
+  );
 
   const [petToDelete, setPetToDelete] = useState<PetEntity | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -52,11 +50,8 @@ export function PetsListPage() {
     petFacade.load(page, PAGE_SIZE, query);
   };
 
-  const clampPage = (page: number) => {
-    if (pagination.total == null) return Math.max(1, page);
-
-    const totalPages = Math.max(1, Math.ceil(pagination.total / PAGE_SIZE));
-    return Math.max(1, Math.min(page, totalPages));
+  const getClampedPage = (page: number) => {
+    return clampPage(page, pagination.total, PAGE_SIZE);
   };
 
   const prevQueryRef = useRef<string | undefined>(undefined);
@@ -67,13 +62,9 @@ export function PetsListPage() {
     loadPage(1, debouncedQuery);
   }, [debouncedQuery]);
 
-  const handlePrevPage = () => loadPage(clampPage(pagination.page - 1));
-  const handleNextPage = () => loadPage(clampPage(pagination.page + 1));
-  const handlePageChange = (page: number) => loadPage(clampPage(page));
-
-  const goToPetDetail = (petId: number) => {
-    navigate(`/pets/${petId}`);
-  };
+  const handlePrevPage = () => loadPage(getClampedPage(pagination.page - 1));
+  const handleNextPage = () => loadPage(getClampedPage(pagination.page + 1));
+  const handlePageChange = (page: number) => loadPage(getClampedPage(page));
 
   const handlePetAdded = () => loadPage(1);
 
@@ -122,13 +113,16 @@ export function PetsListPage() {
     loadPage(pagination.page);
   };
 
-  const hasNextPage = useMemo(() => {
-    if (pagination.total != null && pagination.total > 0) {
-      const totalPages = Math.ceil(pagination.total / pagination.pageSize);
-      return pagination.page < totalPages;
-    }
-    return pets.length >= pagination.pageSize;
-  }, [pagination.page, pagination.pageSize, pagination.total, pets.length]);
+  const hasNextPage = useMemo(
+    () =>
+      calculateHasNextPage(
+        pagination.page,
+        pagination.pageSize,
+        pagination.total,
+        pets.length,
+      ),
+    [pagination.page, pagination.pageSize, pagination.total, pets.length],
+  );
 
   const isEmptyState = !loading && pets.length === 0 && !error;
 
@@ -167,7 +161,7 @@ export function PetsListPage() {
             <PetCard
               key={pet.id}
               pet={pet}
-              onClick={goToPetDetail}
+              onClick={() => navigate(`/pets/${pet.id}`)}
               onEdit={handleEditClick}
               onDelete={handleDeleteClick}
             />

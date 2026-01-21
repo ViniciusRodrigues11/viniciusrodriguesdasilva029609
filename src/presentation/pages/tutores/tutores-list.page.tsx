@@ -10,24 +10,19 @@ import { SearchInput } from "../../components/ui/search-input";
 import { EmptyState } from "../../components/ui/empty-state";
 import { ActionModal } from "../../components/action-modal/action-modal";
 import { useObservable } from "../../hooks/use-observable.hook";
+import { useDebouncedValue } from "../../hooks/use-debounced-value.hook";
 import { tutorFacade } from "../../../services/tutor.service";
 import type { TutorPaginationState } from "../../../application/facades/tutor.facade";
 import type { TutorEntity } from "../../../domain/entities/tutor.entity";
 import { PawPrintLoader } from "../../components/ui/paw-print-loader";
-
-const PAGE_SIZE = 12;
-const SEARCH_DEBOUNCE = 700;
-
-function useDebouncedValue<T>(value: T, delay: number) {
-  const [debounced, setDebounced] = useState(value);
-
-  useEffect(() => {
-    const id = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(id);
-  }, [value, delay]);
-
-  return debounced;
-}
+import {
+  clampPage,
+  calculateHasNextPage,
+} from "../../helpers/pagination.helper";
+import {
+  PAGE_SIZE,
+  SEARCH_DEBOUNCE_MS,
+} from "../../constants/pagination.constants";
 
 export function TutoresListPage() {
   const navigate = useNavigate();
@@ -45,7 +40,10 @@ export function TutoresListPage() {
   );
 
   const [searchTerm, setSearchTerm] = useState("");
-  const debouncedQuery = useDebouncedValue(searchTerm.trim(), SEARCH_DEBOUNCE);
+  const debouncedQuery = useDebouncedValue(
+    searchTerm.trim(),
+    SEARCH_DEBOUNCE_MS,
+  );
 
   const [tutorToDelete, setTutorToDelete] = useState<TutorEntity | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -55,11 +53,8 @@ export function TutoresListPage() {
     tutorFacade.load(page, PAGE_SIZE, query);
   };
 
-  const clampPage = (page: number) => {
-    if (pagination.total == null) return Math.max(1, page);
-
-    const totalPages = Math.max(1, Math.ceil(pagination.total / PAGE_SIZE));
-    return Math.max(1, Math.min(page, totalPages));
+  const getClampedPage = (page: number) => {
+    return clampPage(page, pagination.total, PAGE_SIZE);
   };
 
   const prevQueryRef = useRef<string | undefined>(undefined);
@@ -70,26 +65,18 @@ export function TutoresListPage() {
     loadPage(1, debouncedQuery);
   }, [debouncedQuery]);
 
-  const handlePrevPage = () => loadPage(clampPage(pagination.page - 1));
-  const handleNextPage = () => loadPage(clampPage(pagination.page + 1));
-  const handlePageChange = (page: number) => loadPage(clampPage(page));
-
-  const goToTutorDetail = (tutorId: number) => {
-    navigate(`/tutores/${tutorId}`);
-  };
-
+  const handlePrevPage = () => loadPage(getClampedPage(pagination.page - 1));
+  const handleNextPage = () => loadPage(getClampedPage(pagination.page + 1));
+  const handlePageChange = (page: number) => loadPage(getClampedPage(page));
   const handleTutorAdded = () => loadPage(1);
-
   const handleDeleteClick = (tutorId: number) => {
     const tutor = tutores.find((t) => t.id === tutorId);
     if (tutor) setTutorToDelete(tutor);
   };
-
   const handleEditClick = (tutorId: number) => {
     const tutor = tutores.find((t) => t.id === tutorId);
     if (tutor) setTutorToEdit(tutor);
   };
-
   const handleConfirmDelete = async () => {
     if (!tutorToDelete) return;
 
@@ -123,13 +110,16 @@ export function TutoresListPage() {
     loadPage(pagination.page);
   };
 
-  const hasNextPage = useMemo(() => {
-    if (pagination.total != null && pagination.total > 0) {
-      const totalPages = Math.ceil(pagination.total / pagination.pageSize);
-      return pagination.page < totalPages;
-    }
-    return tutores.length >= pagination.pageSize;
-  }, [pagination.page, pagination.pageSize, pagination.total, tutores.length]);
+  const hasNextPage = useMemo(
+    () =>
+      calculateHasNextPage(
+        pagination.page,
+        pagination.pageSize,
+        pagination.total,
+        tutores.length,
+      ),
+    [pagination.page, pagination.pageSize, pagination.total, tutores.length],
+  );
 
   const isEmptyState = !loading && tutores.length === 0 && !error;
 
@@ -169,7 +159,7 @@ export function TutoresListPage() {
             <TutorCard
               key={tutor.id}
               tutor={tutor}
-              onClick={goToTutorDetail}
+              onClick={() => navigate(`/tutores/${tutor.id}`)}
               onEdit={handleEditClick}
               onDelete={handleDeleteClick}
             />
