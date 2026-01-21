@@ -161,7 +161,7 @@ export function PetsListPage() {
 
         {isEmptyState && <EmptyState message="Ops! Nenhum pet por aqui..." />}
 
-        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid gap-4  md:grid-cols-3 lg:grid-cols-4">
           {pets.map((pet) => (
             <PetCard
               key={pet.id}
