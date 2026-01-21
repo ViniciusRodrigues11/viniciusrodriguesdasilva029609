@@ -1,8 +1,9 @@
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 
 interface SearchInputProps {
   value: string;
   onChange: (value: string) => void;
+  onSearch?: () => void;
   placeholder?: string;
   className?: string;
 }
@@ -10,9 +11,20 @@ interface SearchInputProps {
 export function SearchInput({
   value,
   onChange,
+  onSearch,
   placeholder = "Buscar por nome",
   className = "w-full sm:w-72",
 }: SearchInputProps) {
+  const handleClear = () => {
+    onChange("");
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && onSearch) {
+      onSearch();
+    }
+  };
+
   return (
     <div className={className}>
       <label className="sr-only" htmlFor="search">
@@ -24,9 +36,20 @@ export function SearchInput({
           type="text"
           value={value}
           onChange={(event) => onChange(event.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder={placeholder}
           className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 pr-10 text-sm shadow-sm transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
         />
+        {value && (
+          <button
+            type="button"
+            onClick={handleClear}
+            className="absolute right-10 top-2.5 text-slate-400 hover:text-slate-600 transition-colors"
+            aria-label="Limpar busca"
+          >
+            <X size={16} />
+          </button>
+        )}
         <span
           className="pointer-events-none absolute right-3 top-2.5 text-slate-400"
           aria-hidden="true"

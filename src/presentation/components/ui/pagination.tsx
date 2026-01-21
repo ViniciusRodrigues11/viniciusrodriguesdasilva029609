@@ -93,7 +93,7 @@ export function Pagination({
       className={`flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 transition-all ${
         !isAtBottom
           ? "fixed bottom-4 left-1/2 z-40 w-[90%] -translate-x-1/2 shadow-md md:sticky md:bottom-4 md:left-auto md:translate-x-0 md:max-w-md self-end"
-          : "relative w-full shadow-sm"
+          : "relative w-full shadow-sm mt-4 md:mt-0"
       }`}
     >
       <div className="text-sm text-slate-600">

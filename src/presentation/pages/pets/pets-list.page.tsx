@@ -15,7 +15,7 @@ import type { PetPaginationState } from "../../../application/facades/pet.facade
 import type { PetEntity } from "../../../domain/entities/pet.entity";
 
 const PAGE_SIZE = 12;
-const SEARCH_DEBOUNCE = 300;
+const SEARCH_DEBOUNCE = 700;
 
 export function PetsListPage() {
   const navigate = useNavigate();
@@ -38,14 +38,16 @@ export function PetsListPage() {
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      setDebouncedQuery(searchTerm.trim());
+      setDebouncedQuery(searchTerm);
     }, SEARCH_DEBOUNCE);
 
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
   useEffect(() => {
-    if (!hasLoadedRef.current || debouncedQuery !== "") {
+    if (hasLoadedRef.current) {
+      petFacade.load(1, PAGE_SIZE, debouncedQuery);
+    } else {
       hasLoadedRef.current = true;
       petFacade.load(1, PAGE_SIZE, debouncedQuery);
     }
@@ -142,7 +144,9 @@ export function PetsListPage() {
           <SearchInput
             value={searchTerm}
             onChange={setSearchTerm}
+            onSearch={() => setDebouncedQuery(searchTerm.trim())}
             placeholder="Buscar por nome"
+            className="md:max-w-72 max-w-52"
           />
 
           <AddPetModal onPetAdded={handlePetAdded} />

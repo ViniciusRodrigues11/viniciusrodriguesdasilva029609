@@ -22,6 +22,8 @@ export function HomePage() {
     "/pets/pet4.webp",
     "/pets/pet5.webp",
     "/pets/pet6.webp",
+    "/pets/pet7.webp",
+    "/pets/pet8.webp",
   ];
 
   useEffect(() => {
@@ -59,12 +61,12 @@ export function HomePage() {
       <div className="mx-auto flex max-w-6xl flex-col gap-4 md:gap-8 px-6 py-10">
         <section className="grid items-center gap-8 rounded-2xl bg-white/80 p-8 md:p-14 shadow-sm ring-1 ring-slate-200 backdrop-blur">
           <div className="flex items-center justify-between gap-6 md:gap-12 flex-col lg:flex-row">
-            <div className="space-y-3 flex-1">
-              <div className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-2 text-xs font-semibold text-indigo-700 ring-1 ring-indigo-100">
+            <div className="space-y-3 flex flex-1 flex-col gap-4">
+              <div className="inline-flex items-center w-fit gap-2 rounded-full bg-indigo-50 px-4 py-2 text-xs font-semibold text-indigo-700 ring-1 ring-indigo-100">
                 <Sparkles className="h-4 w-4" />
                 Bem-vindo ao MeuPet
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-slate-900 leading-tight">
+              <h1 className="text-3xl md:text-4xl font-bold text-slate-900 leading-tight mb-0">
                 Acompanhe o cadastro público de{" "}
                 <span className="text-indigo-600">pets</span> e seus{" "}
                 <span className="text-indigo-600">tutores</span>.

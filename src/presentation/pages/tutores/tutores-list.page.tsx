@@ -15,7 +15,7 @@ import type { TutorPaginationState } from "../../../application/facades/tutor.fa
 import type { TutorEntity } from "../../../domain/entities/tutor.entity";
 
 const PAGE_SIZE = 12;
-const SEARCH_DEBOUNCE = 300;
+const SEARCH_DEBOUNCE = 700;
 
 export function TutoresListPage() {
   const navigate = useNavigate();
@@ -41,14 +41,16 @@ export function TutoresListPage() {
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      setDebouncedQuery(searchTerm.trim());
+      setDebouncedQuery(searchTerm);
     }, SEARCH_DEBOUNCE);
 
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
   useEffect(() => {
-    if (!hasLoadedRef.current || debouncedQuery !== "") {
+    if (hasLoadedRef.current) {
+      tutorFacade.load(1, PAGE_SIZE, debouncedQuery);
+    } else {
       hasLoadedRef.current = true;
       tutorFacade.load(1, PAGE_SIZE, debouncedQuery);
     }
@@ -143,6 +145,7 @@ export function TutoresListPage() {
           <SearchInput
             value={searchTerm}
             onChange={setSearchTerm}
+            onSearch={() => setDebouncedQuery(searchTerm.trim())}
             placeholder="Buscar por nome"
             className="md:max-w-72 max-w-52"
           />
