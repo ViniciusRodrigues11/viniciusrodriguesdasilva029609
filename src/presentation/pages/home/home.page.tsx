@@ -184,7 +184,7 @@ function RotatingPets({ images, intervalMs = 3000 }: RotatingPetsProps) {
             src={src}
             alt={alt}
             className={`sticky inset-0 h-60 self-center
-               transition-opacity duration-700 ${isActive ? "opacity-100" : "opacity-0"}`}
+               transition-opacity duration-400 ${isActive ? "opacity-100" : "opacity-0"}`}
             loading={isActive ? "eager" : "lazy"}
           />
         );
