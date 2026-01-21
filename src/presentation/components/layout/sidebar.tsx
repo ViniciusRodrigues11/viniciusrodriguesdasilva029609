@@ -1,5 +1,6 @@
-import { Link, useLocation } from "react-router-dom";
-import { Home, Users, Dog, X } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Home, Users, Dog, X, LogOut, Settings } from "lucide-react";
+import { authFacade } from "../../../services/auth.service";
 
 interface MenuItem {
   path: string;
@@ -27,9 +28,15 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const isActive = (path: string) => {
     return location.pathname.startsWith(path);
+  };
+
+  const handleLogout = () => {
+    authFacade.logout();
+    navigate("/login");
   };
 
   return (
@@ -59,7 +66,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Home className="w-6 h-6 text-blue-600" />
-              <h1 className="text-xl font-bold">Pet System</h1>
+              <h1 className="text-xl font-bold">MeuPet</h1>
             </div>
             {/* Botão fechar (apenas mobile) */}
             <button
@@ -96,8 +103,23 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
         {/* Footer */}
         <div className="p-4 border-t border-slate-200">
-          <div className="text-sm text-slate-600">
-            <p>Versão 1.0.0</p>
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={() => navigate("/health")}
+              className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-slate-700 hover:bg-slate-100 w-full"
+              title="Health Check"
+            >
+              <Settings className="w-5 h-5" />
+              <span className="font-medium">Health</span>
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-red-600 hover:bg-red-50 w-full"
+              title="Sair do sistema"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="font-medium">Sair</span>
+            </button>
           </div>
         </div>
       </aside>

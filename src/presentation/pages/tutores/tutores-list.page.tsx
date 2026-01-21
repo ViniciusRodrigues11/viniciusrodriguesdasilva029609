@@ -136,9 +136,7 @@ export function TutoresListPage() {
       <div className="md:flex md:flex-col md:items-baseline gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Tutores</h1>
-          <p className="text-sm text-slate-600">
-            Catálogo público de tutores cadastrados.
-          </p>
+          <p className="text-sm text-slate-600">Catálogo público de tutores.</p>
         </div>
 
         <div className="flex md:w-full justify-between gap-3 w-auto flex-row items-center my-4">
@@ -193,7 +191,7 @@ export function TutoresListPage() {
 
         <ActionModal
           isOpen={!!tutorToDelete}
-          title="Excluir Tutor"
+          title="Excluir tutor"
           description="Esta ação não pode ser desfeita."
           onClose={handleCancelDelete}
           onConfirm={handleConfirmDelete}

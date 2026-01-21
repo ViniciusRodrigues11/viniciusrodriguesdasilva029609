@@ -3,9 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { tutorFacade } from "../../../services/tutor.service";
 import { useObservable } from "../../hooks/use-observable.hook";
 import type { TutorDetail } from "../../../application/facades/tutor.facade";
-import { ArrowLeft, Mail, Phone, MapPin, IdCard, Plus, X } from "lucide-react";
+import { Mail, Phone, MapPin, IdCard, Plus, X } from "lucide-react";
 import { LinkPetModal } from "../../components/tutores/link-pet-modal";
 import { ActionModal } from "../../components/action-modal/action-modal";
+import { applyPhoneMask, applyCpfMask } from "../../../helpers/mask.helpers";
+import { BackButton } from "../../components/back-button";
 
 export function TutorDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -74,13 +76,7 @@ export function TutorDetailPage() {
   if (loading) {
     return (
       <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8">
-        <button
-          onClick={handleBackClick}
-          className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 mb-4"
-        >
-          <ArrowLeft size={18} />
-          Voltar
-        </button>
+        <BackButton onClick={handleBackClick} className="mb-4" />
         <div className="rounded-lg border border-slate-200 bg-white p-6 text-center text-slate-700 shadow-sm">
           Carregando detalhes do tutor...
         </div>
@@ -91,13 +87,7 @@ export function TutorDetailPage() {
   if (error) {
     return (
       <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8">
-        <button
-          onClick={handleBackClick}
-          className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 mb-4"
-        >
-          <ArrowLeft size={18} />
-          Voltar
-        </button>
+        <BackButton onClick={handleBackClick} className="mb-4" />
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 shadow-sm">
           {error}
         </div>
@@ -108,13 +98,7 @@ export function TutorDetailPage() {
   if (!tutorDetail) {
     return (
       <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8">
-        <button
-          onClick={handleBackClick}
-          className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 mb-4"
-        >
-          <ArrowLeft size={18} />
-          Voltar
-        </button>
+        <BackButton onClick={handleBackClick} className="mb-4" />
         <div className="rounded-lg border border-slate-200 bg-white p-6 text-center text-slate-700 shadow-sm">
           Tutor não encontrado.
         </div>
@@ -124,13 +108,7 @@ export function TutorDetailPage() {
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8">
-      <button
-        onClick={handleBackClick}
-        className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 mb-4 w-fit"
-      >
-        <ArrowLeft size={18} />
-        Voltar
-      </button>
+      <BackButton onClick={handleBackClick} className="mb-4 w-fit" />
 
       {/* Header do Tutor */}
       <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
@@ -179,7 +157,7 @@ export function TutorDetailPage() {
                     href={`tel:${tutorDetail.telefone}`}
                     className="text-lg text-slate-900 hover:text-indigo-600 transition-colors"
                   >
-                    {tutorDetail.telefone}
+                    {applyPhoneMask(tutorDetail.telefone)}
                   </a>
                 </div>
               )}
@@ -197,11 +175,7 @@ export function TutorDetailPage() {
                 <div className="flex items-center gap-3">
                   <IdCard size={18} className="text-slate-400 shrink-0" />
                   <p className="text-lg text-slate-900">
-                    CPF:{" "}
-                    {String(tutorDetail.cpf).replace(
-                      /(\d{3})(\d{3})(\d{3})(\d{2})/,
-                      "$1.$2.$3-$4",
-                    )}
+                    CPF: {applyCpfMask(String(tutorDetail.cpf))}
                   </p>
                 </div>
               )}
@@ -221,7 +195,7 @@ export function TutorDetailPage() {
             className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
           >
             <Plus size={18} />
-            Adicionar Pet
+            Adicionar pet
           </button>
         </div>
 
@@ -290,7 +264,7 @@ export function TutorDetailPage() {
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-6 text-center text-slate-600">
             <p>Este tutor não possui pets cadastrados.</p>
             <p className="text-sm mt-1">
-              Clique em "Adicionar Pet" para vincular um pet.
+              Clique em "Adicionar pet" para vincular um pet.
             </p>
           </div>
         )}

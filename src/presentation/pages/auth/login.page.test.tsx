@@ -55,7 +55,7 @@ describe("LoginPage", () => {
     );
 
     // Assert
-    expect(screen.getByText("Acesso ao Sistema")).toBeInTheDocument();
+    expect(screen.getByText("MeuPet")).toBeInTheDocument();
     expect(screen.getByLabelText(/usuário/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/senha/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /entrar/i })).toBeInTheDocument();

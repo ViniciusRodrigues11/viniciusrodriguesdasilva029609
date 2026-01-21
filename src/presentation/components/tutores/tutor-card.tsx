@@ -1,6 +1,7 @@
 import type { TutorEntity } from "../../../domain/entities/tutor.entity";
 import { User, Mail, Phone, MapPin } from "lucide-react";
 import { Card } from "../ui/card";
+import { applyPhoneMask } from "../../../helpers/mask.helpers";
 
 interface TutorCardProps {
   tutor: TutorEntity;
@@ -41,7 +42,9 @@ export function TutorCard({
           <div className="flex items-center gap-2">
             <Phone className="h-3.5 w-3.5 shrink-0 text-slate-400" />
             <span className="truncate">
-              {tutor.telefone || "Telefone não informado"}
+              {tutor.telefone
+                ? applyPhoneMask(tutor.telefone)
+                : "Telefone não informado"}
             </span>
           </div>
 

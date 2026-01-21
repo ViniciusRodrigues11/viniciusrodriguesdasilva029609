@@ -17,11 +17,15 @@ export function PetCard({ pet, onClick, onEdit, onDelete }: PetCardProps) {
       onDelete={onDelete}
       image={pet.foto?.url ? { url: pet.foto.url, alt: pet.nome } : undefined}
       title={pet.nome}
-      subtitle={pet.raca ? `Raça: ${pet.raca}` : "Raça não informada"}
       metadata={
-        <span className="shrink-0 rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-semibold text-indigo-700">
-          {pet.idade ? `${pet.idade} anos` : "Idade não informada"}
-        </span>
+        <>
+          <span className="text-xs font-medium text-slate-500 line-clamp-2 mb-1">
+            {pet.raca ? `Raça: ${pet.raca}` : "Raça não informada"}
+          </span>
+          <span className="text-xs font-medium text-slate-500 line-clamp-2">
+            {pet.idade ? `Idade: ${pet.idade} anos` : "Idade não informada"}
+          </span>
+        </>
       }
       imageAltContent={
         <div className="text-6xl font-bold text-indigo-300">

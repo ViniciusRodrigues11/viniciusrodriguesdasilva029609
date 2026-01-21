@@ -135,9 +135,7 @@ export function PetsListPage() {
       <div className="md:flex md:flex-col md:items-baseline gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Pets</h1>
-          <p className="text-sm text-slate-600">
-            Catálogo público de pets cadastrados.
-          </p>
+          <p className="text-sm text-slate-600">Catálogo público de pets.</p>
         </div>
 
         <div className="flex md:w-full justify-between gap-3 w-auto flex-row items-center my-4">

@@ -3,7 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { petFacade } from "../../../services/pet.service";
 import { useObservable } from "../../hooks/use-observable.hook";
 import type { PetDetail } from "../../../application/facades/pet.facade";
-import { ArrowLeft, Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
+import { BackButton } from "../../components/back-button";
 
 export function PetDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -33,13 +34,7 @@ export function PetDetailPage() {
   if (loading) {
     return (
       <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8">
-        <button
-          onClick={handleBackClick}
-          className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 mb-4"
-        >
-          <ArrowLeft size={18} />
-          Voltar
-        </button>
+        <BackButton onClick={handleBackClick} className="mb-4" />
         <div className="rounded-lg border border-slate-200 bg-white p-6 text-center text-slate-700 shadow-sm">
           Carregando detalhes do pet...
         </div>
@@ -50,13 +45,7 @@ export function PetDetailPage() {
   if (error) {
     return (
       <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8">
-        <button
-          onClick={handleBackClick}
-          className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 mb-4"
-        >
-          <ArrowLeft size={18} />
-          Voltar
-        </button>
+        <BackButton onClick={handleBackClick} className="mb-4" />
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 shadow-sm">
           {error}
         </div>
@@ -67,13 +56,7 @@ export function PetDetailPage() {
   if (!petDetail) {
     return (
       <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8">
-        <button
-          onClick={handleBackClick}
-          className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 mb-4"
-        >
-          <ArrowLeft size={18} />
-          Voltar
-        </button>
+        <BackButton onClick={handleBackClick} className="mb-4" />
         <div className="rounded-lg border border-slate-200 bg-white p-6 text-center text-slate-700 shadow-sm">
           Pet não encontrado.
         </div>
@@ -83,13 +66,7 @@ export function PetDetailPage() {
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8">
-      <button
-        onClick={handleBackClick}
-        className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 mb-4 w-fit"
-      >
-        <ArrowLeft size={18} />
-        Voltar
-      </button>
+      <BackButton onClick={handleBackClick} className="mb-4 w-fit" />
 
       {/* Header do Pet */}
       <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">

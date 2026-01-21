@@ -129,7 +129,7 @@ export function LinkPetModal({
   return (
     <ActionModal
       isOpen={isOpen}
-      title="Vincular Pet ao Tutor"
+      title="Vincular pet ao tutor"
       description="Selecione um pet para vincular a este tutor."
       onClose={handleClose}
       onConfirm={handleConfirm}

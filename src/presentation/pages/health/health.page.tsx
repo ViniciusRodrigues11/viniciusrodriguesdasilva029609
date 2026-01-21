@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { BackButton } from "../../components/back-button";
 
 type HealthStatus = "loading" | "ok" | "error";
 
@@ -47,6 +49,7 @@ const parseHealthResponse = async (response: Response) => {
 };
 
 export function HealthPage() {
+  const navigate = useNavigate();
   const [liveness, setLiveness] = useState<HealthCheck>({
     status: "loading",
   });
@@ -130,6 +133,7 @@ export function HealthPage() {
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8">
+      <BackButton onClick={() => navigate("/pets")} />
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold text-gray-900">Health Check</h1>
         <p className="text-gray-600">
@@ -148,12 +152,14 @@ export function HealthPage() {
         <span className="text-sm text-slate-500">
           Última verificação: {formatTime(overall.checkedAt)}
         </span>
-        <button
-          onClick={checkHealth}
-          className="ml-auto rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
-        >
-          Atualizar
-        </button>
+        <div className="ml-auto flex items-center gap-2">
+          <button
+            onClick={checkHealth}
+            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-700"
+          >
+            Atualizar
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">

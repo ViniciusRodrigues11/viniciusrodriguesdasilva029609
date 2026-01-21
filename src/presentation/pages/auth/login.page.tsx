@@ -82,11 +82,9 @@ export function LoginPage() {
       <div className="w-full max-w-md">
         <div className="bg-white rounded-lg shadow-md p-8">
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Acesso ao Sistema
-            </h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">MeuPet</h1>
             <p className="text-gray-600 text-sm">
-              Gerenciador de Pets e Tutores
+              Cadastro público de pets e tutores.
             </p>
           </div>
 
@@ -105,7 +103,7 @@ export function LoginPage() {
               onChange={(e) => handleInputChange("username", e.target.value)}
               error={errors.username}
               required
-              placeholder="pai_de_pet"
+              placeholder="Digite seu nome de usuário"
               disabled={isLoading}
             />
 
@@ -117,7 +115,7 @@ export function LoginPage() {
               onChange={(e) => handleInputChange("password", e.target.value)}
               error={errors.password}
               required
-              placeholder="••••••••"
+              placeholder="Digite sua senha"
               disabled={isLoading}
             />
 
@@ -148,21 +146,6 @@ export function LoginPage() {
               )}
             </button>
           </form>
-
-          <div className="mt-6 flex items-center justify-between text-sm">
-            <a
-              href="/register"
-              className="text-indigo-600 hover:text-indigo-700 font-medium"
-            >
-              Criar conta
-            </a>
-            <a
-              href="/reset-password"
-              className="text-indigo-600 hover:text-indigo-700 font-medium"
-            >
-              Recuperar senha
-            </a>
-          </div>
         </div>
       </div>
     </div>

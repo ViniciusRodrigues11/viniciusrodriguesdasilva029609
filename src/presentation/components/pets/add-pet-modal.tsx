@@ -163,15 +163,15 @@ function PetUpsertModal({
   const { modalTitle, confirmLabel, modalDescription } = useMemo(() => {
     if (isEdit) {
       return {
-        modalTitle: "Editar Pet",
+        modalTitle: "Editar pet",
         confirmLabel: "Salvar alterações",
         modalDescription: "Atualize os dados do pet e salve as mudanças.",
       };
     }
 
     return {
-      modalTitle: "Adicionar Novo Pet",
-      confirmLabel: "Adicionar Pet",
+      modalTitle: "Adicionar novo pet",
+      confirmLabel: "Salvar",
       modalDescription:
         "Preencha os dados do novo pet para cadastrá-lo no sistema",
     };
@@ -191,7 +191,7 @@ function PetUpsertModal({
       <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
         <FormInput
           id="pet-name"
-          label="Nome do Pet"
+          label="Nome do pet"
           type="text"
           value={formData.nome}
           onChange={(e) => handleInputChange("nome", e.target.value)}
@@ -245,7 +245,7 @@ export function AddPetModal({ onPetAdded }: AddPetModalProps) {
 
   return (
     <>
-      <AddButton onClick={() => setIsOpen(true)} label="Novo Pet" />
+      <AddButton onClick={() => setIsOpen(true)} label="Novo pet" />
       <PetUpsertModal
         mode="create"
         isOpen={isOpen}

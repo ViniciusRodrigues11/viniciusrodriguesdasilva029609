@@ -198,15 +198,15 @@ function TutorUpsertModal({
   const { modalTitle, confirmLabel, modalDescription } = useMemo(() => {
     if (isEdit) {
       return {
-        modalTitle: "Editar Tutor",
+        modalTitle: "Editar tutor",
         confirmLabel: "Salvar alterações",
         modalDescription: "Atualize os dados do tutor e salve as mudanças.",
       };
     }
 
     return {
-      modalTitle: "Adicionar Novo Tutor",
-      confirmLabel: "Adicionar Tutor",
+      modalTitle: "Adicionar novo tutor",
+      confirmLabel: "Salvar",
       modalDescription:
         "Preencha os dados do novo tutor para cadastrá-lo no sistema",
     };
@@ -302,7 +302,7 @@ export function AddTutorModal({ onTutorAdded }: AddTutorModalProps) {
 
   return (
     <>
-      <AddButton onClick={() => setIsOpen(true)} label="Novo Tutor" />
+      <AddButton onClick={() => setIsOpen(true)} label="Novo tutor" />
       <TutorUpsertModal
         mode="create"
         isOpen={isOpen}
