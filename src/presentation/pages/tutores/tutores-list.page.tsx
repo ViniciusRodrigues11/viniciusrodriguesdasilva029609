@@ -163,7 +163,7 @@ export function TutoresListPage() {
           <EmptyState message="Nenhum tutor por aqui... Talvez os pets queriam passear!" />
         )}
 
-        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
           {tutores.map((tutor) => (
             <TutorCard
               key={tutor.id}
