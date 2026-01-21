@@ -10,6 +10,12 @@ import { LoadingFallback } from "../components/ui/loading-fallback";
 import { MainLayout } from "../components/layout/main-layout";
 
 // Lazy load das páginas
+const HomePage = lazy(() =>
+  import("../pages/home/home.page").then((module) => ({
+    default: module.HomePage,
+  })),
+);
+
 const PetsModule = lazy(() =>
   import("./modules/pets.routes").then((module) => ({
     default: module.default,
@@ -31,10 +37,6 @@ const HealthPage = lazy(() =>
 // Rotas da aplicação
 export const routes: RouteObject[] = [
   {
-    path: "/",
-    element: <Navigate to="/login" replace />,
-  },
-  {
     path: "/login",
     element: <LoginPage />,
   },
@@ -47,6 +49,15 @@ export const routes: RouteObject[] = [
     element: <div>Em construção</div>, // TODO: Implementar reset
   },
   {
+    path: "/health",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <HealthPage />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/",
     element: (
       <ProtectedRoute>
         <MainLayout />
@@ -54,7 +65,15 @@ export const routes: RouteObject[] = [
     ),
     children: [
       {
-        path: "/pets/*",
+        index: true,
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <HomePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "pets/*",
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <PetsModule />
@@ -62,7 +81,7 @@ export const routes: RouteObject[] = [
         ),
       },
       {
-        path: "/tutores/*",
+        path: "tutores/*",
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <TutoresModule />
@@ -72,12 +91,8 @@ export const routes: RouteObject[] = [
     ],
   },
   {
-    path: "/health",
-    element: (
-      <Suspense fallback={<LoadingFallback />}>
-        <HealthPage />
-      </Suspense>
-    ),
+    path: "*",
+    element: <Navigate to="/" replace />,
   },
 ];
 

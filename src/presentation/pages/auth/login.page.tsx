@@ -48,7 +48,7 @@ export function LoginPage() {
   };
 
   if (isAuthenticated) {
-    return <Navigate to="/pets" replace />;
+    return <Navigate to="/" replace />;
   }
 
   const handleInputChange = <K extends keyof LoginForm>(

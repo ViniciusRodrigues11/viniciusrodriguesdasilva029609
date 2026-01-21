@@ -67,6 +67,12 @@ export class PetFacade {
     return this.detailLoadingSubject.asObservable();
   }
 
+  async getTotalCount(): Promise<number> {
+    const result = await this.listPetsUseCase.execute({ page: 1, size: 1 });
+    const total = result.total ?? result.pets.length ?? 0;
+    return Math.max(0, total);
+  }
+
   load(page: number = 1, pageSize: number = 10, query?: string): void {
     this.loadingSubject.next(true);
     this.errorSubject.next(null);

@@ -10,6 +10,11 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   {
+    path: "/",
+    label: "Início",
+    icon: <Home className="w-5 h-5" />,
+  },
+  {
     path: "/pets",
     label: "Pets",
     icon: <Dog className="w-5 h-5" />,
@@ -31,6 +36,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const navigate = useNavigate();
 
   const isActive = (path: string) => {
+    if (path === "/") return location.pathname === "/";
     return location.pathname.startsWith(path);
   };
 
