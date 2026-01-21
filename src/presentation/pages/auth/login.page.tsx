@@ -78,23 +78,44 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-indigo-50 to-indigo-100 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">MeuPet</h1>
-            <p className="text-gray-600 text-sm">
-              Cadastro público de pets e tutores.
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
+        <div className="absolute -top-[20%] -right-[10%] w-[70%] h-[70%] rounded-full bg-indigo-100/50 blur-3xl" />
+        <div className="absolute -bottom-[20%] -left-[10%] w-[70%] h-[70%] rounded-full bg-blue-50/50 blur-3xl" />
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-8 sm:p-10">
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">
+              MeuPet
+            </h1>
+            <p className="text-gray-500 text-sm">
+              Entre para gerenciar seus pets e tutores
             </p>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-red-800 text-sm font-medium">{error}</p>
+            <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3">
+              <svg
+                className="w-5 h-5 text-red-500 shrink-0 mt-0.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <p className="text-red-700 text-sm font-medium">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <FormInput
               id="username"
               label="Nome de usuário"
@@ -107,27 +128,29 @@ export function LoginPage() {
               disabled={isLoading}
             />
 
-            <FormInput
-              id="password"
-              label="Senha"
-              type="password"
-              value={formData.password}
-              onChange={(e) => handleInputChange("password", e.target.value)}
-              error={errors.password}
-              required
-              placeholder="Digite sua senha"
-              disabled={isLoading}
-            />
+            <div className="space-y-1">
+              <FormInput
+                id="password"
+                label="Senha"
+                type="password"
+                value={formData.password}
+                onChange={(e) => handleInputChange("password", e.target.value)}
+                error={errors.password}
+                required
+                placeholder="Digite sua senha"
+                disabled={isLoading}
+              />
+            </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200 flex items-center justify-center gap-2"
+              className="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
               {isLoading ? (
                 <>
                   <svg
-                    className="w-4 h-4 animate-spin"
+                    className="w-5 h-5 animate-spin"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -139,10 +162,25 @@ export function LoginPage() {
                       d="M12 4v16m8-8H4"
                     />
                   </svg>
-                  Entrando...
+                  <span>Entrando...</span>
                 </>
               ) : (
-                "Entrar"
+                <>
+                  <span>Entrar</span>
+                  <svg
+                    className="w-4 h-4 opacity-70"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M14 5l7 7m0 0l-7 7m7-7H3"
+                    />
+                  </svg>
+                </>
               )}
             </button>
           </form>
