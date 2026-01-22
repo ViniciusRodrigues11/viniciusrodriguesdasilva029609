@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { LoginPage } from "../auth/login.page";
-import { BrowserRouter } from "react-router-dom";
+import { MemoryRouter } from "react-router-dom";
 import * as authService from "../../../services/auth.service";
 
 // Mock do router
@@ -48,11 +48,7 @@ describe("LoginPage", () => {
 
   it("deve renderizar o formulário de login", () => {
     // Act
-    render(
-      <BrowserRouter>
-        <LoginPage />
-      </BrowserRouter>,
-    );
+    render(<LoginPage />);
 
     // Assert
     expect(screen.getByText("MeuPet")).toBeInTheDocument();
@@ -63,11 +59,11 @@ describe("LoginPage", () => {
 
   it("deve validar usuário obrigatório", async () => {
     // Arrange
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: 0 });
     render(
-      <BrowserRouter>
+      <MemoryRouter>
         <LoginPage />
-      </BrowserRouter>,
+      </MemoryRouter>,
     );
 
     const submitButton = screen.getByRole("button", { name: /entrar/i });
@@ -83,11 +79,11 @@ describe("LoginPage", () => {
 
   it("deve validar senha obrigatória", async () => {
     // Arrange
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: 0 });
     render(
-      <BrowserRouter>
+      <MemoryRouter>
         <LoginPage />
-      </BrowserRouter>,
+      </MemoryRouter>,
     );
 
     const submitButton = screen.getByRole("button", { name: /entrar/i });
@@ -103,11 +99,11 @@ describe("LoginPage", () => {
 
   it("deve validar comprimento mínimo da senha", async () => {
     // Arrange
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: 0 });
     render(
-      <BrowserRouter>
+      <MemoryRouter>
         <LoginPage />
-      </BrowserRouter>,
+      </MemoryRouter>,
     );
 
     const passwordInput = screen.getByLabelText(/senha/i);
@@ -127,11 +123,10 @@ describe("LoginPage", () => {
 
   it("deve disparar login com credenciais válidas", async () => {
     // Arrange
-    const user = userEvent.setup();
     render(
-      <BrowserRouter>
+      <MemoryRouter>
         <LoginPage />
-      </BrowserRouter>,
+      </MemoryRouter>,
     );
 
     const usernameInput = screen.getByLabelText(/usuário/i);
@@ -139,21 +134,17 @@ describe("LoginPage", () => {
     const submitButton = screen.getByRole("button", { name: /entrar/i });
 
     // Act
-    await user.type(usernameInput, "testuser");
-    await user.type(passwordInput, "password123");
-    await user.click(submitButton);
+    fireEvent.input(usernameInput, { target: { value: "testuser" } });
+    fireEvent.input(passwordInput, { target: { value: "password123" } });
+    fireEvent.click(submitButton);
 
-    // Assert
-    await waitFor(() => {
-      expect(authService.authFacade.login).toHaveBeenCalledWith({
-        username: "testuser",
-        password: "password123",
-      });
+    expect(authService.authFacade.login).toHaveBeenCalledWith({
+      username: "testuser",
+      password: "password123",
     });
   });
 
   it("deve desabilitar inputs durante carregamento", async () => {
-    // Arrange - Mock com loading true
     Object.defineProperty(authService.authFacade, "isLoading$", {
       value: {
         subscribe: (callback: (value: boolean) => void) => {
@@ -165,9 +156,9 @@ describe("LoginPage", () => {
     });
 
     render(
-      <BrowserRouter>
+      <MemoryRouter>
         <LoginPage />
-      </BrowserRouter>,
+      </MemoryRouter>,
     );
 
     // Assert

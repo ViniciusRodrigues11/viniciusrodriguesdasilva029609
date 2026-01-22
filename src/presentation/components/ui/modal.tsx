@@ -26,6 +26,7 @@ export function Modal({
 }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const wasOpenRef = useRef(false);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -35,19 +36,28 @@ export function Modal({
     };
 
     if (isOpen) {
-      previousFocusRef.current = document.activeElement as HTMLElement;
+      if (!wasOpenRef.current) {
+        previousFocusRef.current = document.activeElement as HTMLElement;
+
+        setTimeout(() => {
+          if (
+            modalRef.current &&
+            !modalRef.current.contains(document.activeElement)
+          ) {
+            modalRef.current.focus();
+          }
+        }, 0);
+      }
 
       document.addEventListener("keydown", handleEscape);
       document.body.style.overflow = "hidden";
-
-      setTimeout(() => {
-        modalRef.current?.focus();
-      }, 0);
     } else {
       if (previousFocusRef.current) {
         previousFocusRef.current.focus();
       }
     }
+
+    wasOpenRef.current = isOpen;
 
     return () => {
       document.removeEventListener("keydown", handleEscape);
