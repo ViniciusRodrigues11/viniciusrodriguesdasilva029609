@@ -112,7 +112,7 @@ export function Pagination({
           aria-label={`Ir para página ${currentPage - 1}`}
           onClick={onPreviousPage}
           disabled={currentPage <= 1 || isLoading}
-          className="rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-md border cursor-pointer border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
         >
           <ChevronLeft className="inline-block h-4 w-4" aria-hidden="true" />
         </button>
@@ -128,7 +128,7 @@ export function Pagination({
               className={`min-w-9 rounded-md border px-2.5 py-1.5 text-sm font-medium transition ${
                 item === currentPage
                   ? "border-indigo-500 bg-indigo-50 text-indigo-700"
-                  : "border-slate-200 text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  : "border-slate-200 text-slate-700 cursor-pointer hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
               }`}
             >
               {item}
@@ -149,7 +149,7 @@ export function Pagination({
           aria-label={`Ir para página ${currentPage + 1}`}
           onClick={onNextPage}
           disabled={!derivedHasNextPage || isLoading}
-          className="rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-md border cursor-pointer border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
         >
           <ChevronRight className="inline-block h-4 w-4" aria-hidden="true" />
         </button>
