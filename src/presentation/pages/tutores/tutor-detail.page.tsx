@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { tutorFacade } from "../../../services/tutor.service";
 import { useObservable } from "../../hooks/use-observable.hook";
 import type { TutorDetail } from "../../../application/facades/tutor.facade";
-import { Mail, Phone, MapPin, IdCard, Plus, X } from "lucide-react";
+import { Mail, Phone, MapPin, IdCard, Plus, X, PawPrint } from "lucide-react";
 import { LinkPetModal } from "../../components/tutores/link-pet-modal";
 import { ActionModal } from "../../components/action-modal/action-modal";
 import { applyPhoneMask, applyCpfMask } from "../../../helpers/mask.helpers";
@@ -231,7 +231,9 @@ export function TutorDetailPage() {
                       />
                     ) : (
                       <div className="w-20 h-20 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
-                        <span className="text-2xl">🐾</span>
+                        <span className="text-2xl text-slate-400">
+                          <PawPrint size={24} />
+                        </span>
                       </div>
                     )}
 

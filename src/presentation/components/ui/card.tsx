@@ -110,7 +110,7 @@ export function Card({
             className="h-full w-full object-cover object-top transition duration-300 group-hover:scale-110"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-indigo-100 to-slate-100">
+          <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-slate-100 to-slate-200">
             {imageAltContent}
           </div>
         )}

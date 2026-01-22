@@ -1,3 +1,4 @@
+import { PawPrint } from "lucide-react";
 import type { PetEntity } from "../../../domain/entities/pet.entity";
 import { Card } from "../ui/card";
 
@@ -28,8 +29,8 @@ export function PetCard({ pet, onClick, onEdit, onDelete }: PetCardProps) {
         </>
       }
       imageAltContent={
-        <div className="text-6xl font-bold text-indigo-300">
-          {pet.nome.charAt(0).toUpperCase()}
+        <div className="text-6xl font-bold text-slate-300">
+          <PawPrint strokeWidth={1.5} size={30} />
         </div>
       }
     />

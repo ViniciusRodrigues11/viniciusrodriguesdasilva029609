@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { petFacade } from "../../../services/pet.service";
 import { useObservable } from "../../hooks/use-observable.hook";
 import type { PetDetail } from "../../../application/facades/pet.facade";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin, PawPrint } from "lucide-react";
 import { BackButton } from "../../components/back-button";
 
 export function PetDetailPage() {
@@ -85,7 +85,9 @@ export function PetDetailPage() {
           ) : (
             <div className="md:w-64 shrink-0 bg-slate-100 rounded-lg flex items-center justify-center h-64">
               <div className="text-center text-slate-400">
-                <div className="text-4xl mb-2">🐾</div>
+                <div className="text-4xl mb-2 flex items-center justify-center">
+                  <PawPrint size={20} />
+                </div>
                 <p>Sem foto</p>
               </div>
             </div>

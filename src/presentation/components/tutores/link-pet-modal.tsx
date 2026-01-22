@@ -5,6 +5,7 @@ import { petFacade } from "../../../services/pet.service";
 import { useObservable } from "../../hooks/use-observable.hook";
 import type { PetEntity } from "../../../domain/entities/pet.entity";
 import type { PetPaginationState } from "../../../application/facades/pet.facade";
+import { PawPrint } from "lucide-react";
 
 interface LinkPetModalProps {
   isOpen: boolean;
@@ -179,7 +180,9 @@ export function LinkPetModal({
                   />
                 ) : (
                   <div className="w-16 h-16 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
-                    <span className="text-2xl">🐾</span>
+                    <span className="text-2xl">
+                      <PawPrint size={24} />
+                    </span>
                   </div>
                 )}
 

@@ -26,7 +26,7 @@ export function TutorCard({
         tutor.foto?.url ? { url: tutor.foto.url, alt: tutor.nome } : undefined
       }
       imageAltContent={
-        <User className="h-16 w-16 text-indigo-300" strokeWidth={1.5} />
+        <User className="text-slate-300" strokeWidth={1.5} size={30} />
       }
       imageHeight="h-32"
       title={tutor.nome}
