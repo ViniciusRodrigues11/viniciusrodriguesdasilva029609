@@ -26,6 +26,7 @@ describe('AuthFacade', () => {
       getExpiresIn: vi.fn().mockReturnValue(null),
       getRefreshExpiresIn: vi.fn().mockReturnValue(null),
       getAccessExpiresAt: vi.fn().mockReturnValue(null),
+      getRefreshExpiresAt: vi.fn().mockReturnValue(null),
       clearTokens: vi.fn().mockImplementation(() => { }),
       hasTokens: vi.fn().mockReturnValue(false),
     } as unknown as TokenStorage;
@@ -58,6 +59,25 @@ describe('AuthFacade', () => {
 
       // Assert
       expect(result).toBe(false);
+    });
+  });
+
+  describe('initializeAuthState', () => {
+    it('deve fazer logout quando refresh token estiver expirado', () => {
+      // Arrange
+      vi.spyOn(mockTokenStorage, 'getRefreshExpiresAt').mockReturnValue(Date.now() - 1000);
+      vi.spyOn(mockTokenStorage, 'hasTokens').mockReturnValue(true);
+
+      // Act
+      facade = new AuthFacade(
+        mockLoginUseCase,
+        mockRefreshTokenUseCase,
+        mockRepository,
+        mockTokenStorage as TokenStorage
+      );
+
+      // Assert
+      expect(mockTokenStorage.clearTokens).toHaveBeenCalled();
     });
   });
 

@@ -103,6 +103,12 @@ export class AuthFacade {
   }
 
   private initializeAuthState(): void {
+    const refreshExpiresAt = this.tokenStorage.getRefreshExpiresAt();
+    if (refreshExpiresAt && refreshExpiresAt <= Date.now()) {
+      this.logout();
+      return;
+    }
+
     const hasTokens = this.tokenStorage.hasTokens();
     this.updateAuthState({
       isAuthenticated: hasTokens,
