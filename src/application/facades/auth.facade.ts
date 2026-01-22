@@ -131,11 +131,9 @@ export class AuthFacade {
     }
 
     const now = Date.now();
-    const leadMs = 3_000; // renova 3s antes de expirar
+    const leadMs = 3_000;
     const msUntilRefresh = accessExpiresAt - now - leadMs;
 
-    // Se o token já expirou ou vai expirar em menos de 5s, não agenda
-    // Deixa o interceptor do axios lidar com isso no próximo request
     if (msUntilRefresh < 5_000) {
       return;
     }
@@ -145,7 +143,6 @@ export class AuthFacade {
     }
 
     this.refreshTimeoutId = window.setTimeout(() => {
-      // Garante que ainda há tokens válidos antes de tentar
       if (this.tokenStorage.hasTokens()) {
         this.refreshToken();
       }
