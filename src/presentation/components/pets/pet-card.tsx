@@ -20,10 +20,19 @@ export function PetCard({ pet, onClick, onEdit, onDelete }: PetCardProps) {
       title={pet.nome}
       metadata={
         <>
-          <span className="text-xs font-medium text-slate-500 line-clamp-2 mb-1">
-            {pet.raca ? `Raça: ${pet.raca}` : "Raça não informada"}
+          <span className="text-xs font-medium text-slate-500 mb-1">
+            {pet.raca ? (
+              <div className="flex">
+                <span>Raça:</span>
+                <span className="ml-1 text-ellipsis line-clamp-1">
+                  {pet.raca}
+                </span>
+              </div>
+            ) : (
+              "Raça não informada"
+            )}
           </span>
-          <span className="text-xs font-medium text-slate-500 line-clamp-2">
+          <span className="text-xs font-medium text-slate-500 line-clamp-2 text-ellipsis">
             {pet.idade ? `Idade: ${pet.idade} anos` : "Idade não informada"}
           </span>
         </>

@@ -1,8 +1,4 @@
-import {
-  createBrowserRouter,
-  type RouteObject,
-  Navigate,
-} from "react-router-dom";
+import { createBrowserRouter, type RouteObject } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { LoginPage } from "../pages/auth/login.page";
 import { ProtectedRoute } from "./protected.route";
@@ -31,6 +27,12 @@ const TutoresModule = lazy(() =>
 const HealthPage = lazy(() =>
   import("../pages/health/health.page").then((module) => ({
     default: module.HealthPage,
+  })),
+);
+
+const NotFoundPage = lazy(() =>
+  import("../pages/not-found/not-found.page").then((module) => ({
+    default: module.NotFoundPage,
   })),
 );
 
@@ -92,7 +94,11 @@ export const routes: RouteObject[] = [
   },
   {
     path: "*",
-    element: <Navigate to="/" replace />,
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <NotFoundPage />
+      </Suspense>
+    ),
   },
 ];
 

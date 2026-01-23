@@ -23,6 +23,7 @@ import {
   PAGE_SIZE,
   SEARCH_DEBOUNCE_MS,
 } from "../../constants/pagination.constants";
+import { ErrorState } from "../../components/error-state";
 
 export function PetsListPage() {
   const navigate = useNavigate();
@@ -149,9 +150,7 @@ export function PetsListPage() {
         {loading && <PawPrintLoader />}
 
         {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 shadow-sm">
-            {error}
-          </div>
+          <ErrorState description="Não foi possível carregar a lista de pets." />
         )}
 
         {isEmptyState && <EmptyState message="Ops! Nenhum pet por aqui..." />}

@@ -8,6 +8,7 @@ import { LinkPetModal } from "../../components/tutores/link-pet-modal";
 import { ActionModal } from "../../components/action-modal/action-modal";
 import { applyPhoneMask, applyCpfMask } from "../../../helpers/mask.helpers";
 import { BackButton } from "../../components/back-button";
+import { ErrorState } from "../../components/error-state";
 
 export function TutorDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -86,24 +87,11 @@ export function TutorDetailPage() {
     );
   }
 
-  if (error) {
+  if (error || !tutorDetail) {
     return (
       <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8">
         <BackButton onClick={handleBackClick} className="mb-4" />
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 shadow-sm">
-          {error}
-        </div>
-      </div>
-    );
-  }
-
-  if (!tutorDetail) {
-    return (
-      <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8">
-        <BackButton onClick={handleBackClick} className="mb-4" />
-        <div className="rounded-lg border border-slate-200 bg-white p-6 text-center text-slate-700 shadow-sm">
-          Tutor não encontrado.
-        </div>
+        <ErrorState description="Não foi possível carregar os detalhes do tutor." />
       </div>
     );
   }

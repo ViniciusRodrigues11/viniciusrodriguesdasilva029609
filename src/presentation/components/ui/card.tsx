@@ -119,11 +119,11 @@ export function Card({
       {/* Content Section */}
       <div className="flex flex-col justify-between gap-2 p-5 text-left">
         <div className="space-y-2">
-          <h3 className="text-base font-bold text-slate-900 line-clamp-1">
+          <h3 className="text-base font-bold text-slate-900 line-clamp-1 text-ellipsis">
             {title}
           </h3>
           {subtitle && (
-            <p className="text-xs font-medium text-slate-500 line-clamp-2">
+            <p className="text-xs font-medium text-slate-500 line-clamp-2 text-ellipsis">
               {subtitle}
             </p>
           )}

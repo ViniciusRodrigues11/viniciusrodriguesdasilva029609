@@ -5,6 +5,8 @@ import { useObservable } from "../../hooks/use-observable.hook";
 import type { PetDetail } from "../../../application/facades/pet.facade";
 import { Mail, Phone, MapPin, PawPrint } from "lucide-react";
 import { BackButton } from "../../components/back-button";
+import { PawPrintLoader } from "../../components/ui/paw-print-loader";
+import { ErrorState } from "../../components/error-state";
 
 export function PetDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -37,31 +39,16 @@ export function PetDetailPage() {
     return (
       <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8">
         <BackButton onClick={handleBackClick} className="mb-4" />
-        <div className="rounded-lg border border-slate-200 bg-white p-6 text-center text-slate-700 shadow-sm">
-          Carregando detalhes do pet...
-        </div>
+        <PawPrintLoader />
       </div>
     );
   }
 
-  if (error) {
+  if (error || !petDetail) {
     return (
       <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8">
         <BackButton onClick={handleBackClick} className="mb-4" />
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 shadow-sm">
-          {error}
-        </div>
-      </div>
-    );
-  }
-
-  if (!petDetail) {
-    return (
-      <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8">
-        <BackButton onClick={handleBackClick} className="mb-4" />
-        <div className="rounded-lg border border-slate-200 bg-white p-6 text-center text-slate-700 shadow-sm">
-          Pet não encontrado.
-        </div>
+        <ErrorState description="Não foi possível carregar os detalhes do pet." />
       </div>
     );
   }
