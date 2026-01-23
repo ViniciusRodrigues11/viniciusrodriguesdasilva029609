@@ -41,6 +41,16 @@ O projeto segue uma arquitetura em camadas com **Facade** e **Use Cases**, mante
 ## Requisitos
 - Node.js 20+
 
+## Variáveis de Ambiente
+
+O projeto utiliza variáveis de ambiente Vite para configuração da API. Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
+
+```env
+VITE_API_URL=https://pet-manager-api.geia.vip
+```
+
+Um exemplo de configuração está disponível em `.env.example`. As variáveis de ambiente começadas com `VITE_` são automaticamente expostas no código do cliente durante o build.
+
 ## Como utilizar a aplicação:
 
 Existem 3 formas de testar: 
@@ -86,13 +96,38 @@ Fluxo sugerido:
 Este repositório inclui um `Dockerfile` multi-stage para empacotar o build estático.
 
 ### Build da imagem
+
+Por padrão, o build utiliza a API em `https://pet-manager-api.geia.vip`:
+
 ```bash
 docker build -t pet-front:latest .
 ```
 
-### Executar
+Para usar uma URL diferente da API, passe o argumento `VITE_API_URL`:
+
+```bash
+docker build --build-arg VITE_API_URL=https://outra-api.com -t pet-front:latest .
+```
+
+### Executar com Docker
+
 ```bash
 docker run --rm -p 8080:80 pet-front:latest
 ```
 
 A aplicação ficará disponível em `http://localhost:8080`.
+
+### Executar com Docker Compose
+
+```bash
+# Usa a variável VITE_API_URL do arquivo .env
+docker-compose up --build
+```
+
+Você pode sobrescrever a variável ao executar:
+
+```bash
+VITE_API_URL=https://outra-api.com docker-compose up --build
+```
+
+O container expõe a porta `3000` por padrão (configurável em `docker-compose.yml`).
