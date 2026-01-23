@@ -5,7 +5,7 @@ import type { AuthEntity, CredentialsEntity } from '../../domain/entities/auth.e
 export class AuthApi {
   private readonly api: AxiosInstance;
 
-  constructor(baseURL: string = 'https://pet-manager-api.geia.vip') {
+  constructor(baseURL: string = import.meta.env.VITE_API_URL) {
     this.api = axios.create({
       baseURL,
       headers: {

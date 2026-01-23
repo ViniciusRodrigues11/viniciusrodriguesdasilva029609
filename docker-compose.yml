@@ -1,0 +1,10 @@
+services:
+  pet-front:
+    build:
+      context: .
+      args:
+        VITE_API_URL: ${VITE_API_URL:-https://pet-manager-api.geia.vip}
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production

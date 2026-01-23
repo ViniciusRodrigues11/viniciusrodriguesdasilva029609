@@ -11,7 +11,7 @@ export class AxiosClient {
     reject: (reason?: unknown) => void;
   }> = [];
 
-  constructor(baseURL: string = 'https://pet-manager-api.geia.vip', tokenStorage?: TokenStorage) {
+  constructor(baseURL: string = import.meta.env.VITE_API_URL, tokenStorage?: TokenStorage) {
     this.tokenStorage = tokenStorage;
 
     this.client = axios.create({
