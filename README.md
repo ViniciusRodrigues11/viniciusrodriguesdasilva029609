@@ -1,5 +1,7 @@
 # Pet Front
 
+![Banner do projeto](docs/banner.webp)
+
 SPA em React + TypeScript para o registro público de Pets e seus Tutores, consumindo a API pública do desafio.
 
 ## Dados de inscrição
