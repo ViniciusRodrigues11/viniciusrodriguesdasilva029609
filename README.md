@@ -4,6 +4,26 @@
 
 SPA em React + TypeScript para o registro público de Pets e seus Tutores, consumindo a API pública do desafio.
 
+## Sumário
+- [Dados de inscrição](#dados-de-inscrição)
+- [Vaga](#vaga)
+- [Arquitetura](#arquitetura)
+  - [Organização de pastas](#organização-de-pastas)
+- [Funcionalidades principais](#funcionalidades-principais)
+- [Requisitos](#requisitos)
+- [Variáveis de Ambiente](#variáveis-de-ambiente)
+- [Como utilizar a aplicação](#como-utilizar-a-aplicação)
+- [Executando localmente](#executando-localmente)
+  - [Build e preview](#build-e-preview)
+  - [Testes](#testes)
+  - [Lint](#lint)
+- [Deploy](#deploy)
+- [Executando container](#executando-container)
+  - [Build da imagem](#build-da-imagem)
+  - [Executar com Docker](#executar-com-docker)
+  - [Executar com Docker Compose](#executar-com-docker-compose)
+- [Recursos extras](#recursos-extras)
+
 ## Dados de inscrição
   Nome: Vinicius Rodrigues da Silva
   Email: viniciusrodriguess.dev@gmail.com
@@ -41,7 +61,8 @@ O projeto segue uma arquitetura em camadas com **Facade** e **Use Cases**, mante
 - Página de health check.
 
 ## Requisitos
-- Node.js 20+
+- Node.js 24 (LTS)
+- PNPM 10
 
 ## Variáveis de Ambiente
 
@@ -62,7 +83,7 @@ Existem 3 formas de testar:
 
 Abaixo eu deixo explicado como executar o projeto localmente das duas formas
 
-# Executando localmente
+## Executando localmente
 ```bash
 pnpm install
 pnpm dev
@@ -94,7 +115,7 @@ Fluxo sugerido:
 1. `pnpm build`
 2. Publicar o diretório `dist/`
 
-# Executando container
+## Executando container
 Este repositório inclui um `Dockerfile` multi-stage para empacotar o build estático.
 
 ### Build da imagem
@@ -133,3 +154,18 @@ VITE_API_URL=https://outra-api.com docker-compose up --build
 ```
 
 O container expõe a porta `3000` por padrão (configurável em `docker-compose.yml`).
+
+## Recursos extras
+
+Tomei a liberdade de ampliar o escopo do projeto adicionando funcionalidades não obrigatórias. Segue abaixo uma lista das melhorias feitas:
+
+- Página inicial com contador de Pets e Tutores;
+- Loadings animados
+- Vincular multiplos pets de uma vez
+- Página 404
+- Regras de validação dos inputs
+  - Validação de CPF
+  - Validação de Email
+  - Tamanhos mínimos e máximos para alguns textos
+- Build multi-stage no docker
+- Eslint

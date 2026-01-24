@@ -26,10 +26,12 @@ export class AxiosClient {
 
   private setupInterceptors(): void {
     this.client.interceptors.request.use((config) => {
-      const token = this.tokenStorage?.getAccessToken();
-      if (token) {
-        config.headers = config.headers ?? {};
-        config.headers['Authorization'] = `Bearer ${token}`;
+      if (!config.headers?.['Authorization']) {
+        const token = this.tokenStorage?.getAccessToken();
+        if (token) {
+          config.headers = config.headers ?? {};
+          config.headers['Authorization'] = `Bearer ${token}`;
+        }
       }
       return config;
     });

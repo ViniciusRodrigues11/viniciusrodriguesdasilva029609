@@ -23,7 +23,7 @@ export class AuthApi {
   async refreshToken(refreshToken: string): Promise<AuthEntity> {
     const response = await this.httpClient.put<AuthEntity>(
       '/autenticacao/refresh',
-      {},
+      undefined,
       {
         headers: {
           Authorization: `Bearer ${refreshToken}`,
