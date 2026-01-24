@@ -27,7 +27,7 @@ export function NotFoundPage() {
             className="rounded-lg flex items-center justify-between px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100"
           >
             <ChevronLeft size={16} className="mr-2" />
-            <span className="sr-only">Voltar ao início </span>
+            <span>Voltar ao início </span>
           </Link>
         </div>
       </div>
