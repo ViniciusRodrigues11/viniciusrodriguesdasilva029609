@@ -108,11 +108,13 @@ describe("TutorDetailPage", () => {
   });
 
   it("exibe mensagem de erro", () => {
-    errorSubject.next("Falha ao carregar tutor");
+    errorSubject.next("Não foi possível carregar os detalhes do tutor.");
 
     render(<TutorDetailPage />);
 
-    expect(screen.getByText("Falha ao carregar tutor")).toBeInTheDocument();
+    expect(
+      screen.getByText("Não foi possível carregar os detalhes do tutor."),
+    ).toBeInTheDocument();
   });
 
   it("renderiza os detalhes do tutor e lista de pets", () => {

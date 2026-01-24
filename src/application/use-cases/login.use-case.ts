@@ -2,6 +2,7 @@ import type { IAuthRepository } from '../../domain/repositories/auth.repository'
 import type { CredentialsEntity } from '../../domain/entities/auth.entity';
 import { Observable, from, catchError } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
+import { extractErrorMessage } from '../../helpers/error-handler.helper';
 
 export interface LoginState {
   isLoading: boolean;
@@ -18,7 +19,7 @@ export class LoginUseCase {
         error: null,
       })),
       catchError((error) => {
-        const errorMessage = this.extractErrorMessage(error);
+        const errorMessage = extractErrorMessage(error);
         return [
           {
             isLoading: false,
@@ -31,24 +32,5 @@ export class LoginUseCase {
         error: null,
       })
     );
-  }
-
-  private extractErrorMessage(error: unknown): string {
-    if (error && typeof error === 'object' && 'response' in error) {
-      const httpError = error as { response?: { status: number } };
-      if (httpError.response?.status === 401) {
-        return 'Usuário ou senha incorretos';
-      }
-      if (httpError.response?.status === 400) {
-        return 'Dados de entrada inválidos';
-      }
-    }
-    if (error instanceof Error) {
-      if (error.message === 'Network Error') {
-        return 'Erro de conexão com o servidor';
-      }
-      return error.message || 'Erro ao realizar login';
-    }
-    return 'Erro ao realizar login';
   }
 }

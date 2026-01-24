@@ -1,21 +1,11 @@
-import axios from 'axios';
 import type { AxiosInstance } from 'axios';
 import type { AuthEntity, CredentialsEntity } from '../../domain/entities/auth.entity';
 
 export class AuthApi {
-  private readonly api: AxiosInstance;
-
-  constructor(baseURL: string = import.meta.env.VITE_API_URL) {
-    this.api = axios.create({
-      baseURL,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-  }
+  constructor(private readonly httpClient: AxiosInstance) { }
 
   async login(credentials: CredentialsEntity): Promise<AuthEntity> {
-    const response = await this.api.post<AuthEntity>('/autenticacao/login', {
+    const response = await this.httpClient.post<AuthEntity>('/autenticacao/login', {
       username: credentials.username,
       password: credentials.password,
     });
@@ -23,7 +13,7 @@ export class AuthApi {
   }
 
   async refreshToken(refreshToken: string): Promise<AuthEntity> {
-    const response = await this.api.put<AuthEntity>(
+    const response = await this.httpClient.put<AuthEntity>(
       '/autenticacao/refresh',
       {},
       {
@@ -33,17 +23,5 @@ export class AuthApi {
       }
     );
     return response.data;
-  }
-
-  setAccessToken(token: string): void {
-    this.api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-  }
-
-  clearAccessToken(): void {
-    delete this.api.defaults.headers.common['Authorization'];
-  }
-
-  getClient(): AxiosInstance {
-    return this.api;
   }
 }

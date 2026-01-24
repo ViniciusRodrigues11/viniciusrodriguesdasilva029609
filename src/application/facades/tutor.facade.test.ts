@@ -144,7 +144,7 @@ describe('TutorFacade', () => {
       await expect(facade.deleteTutor(1)).rejects.toEqual(httpError);
 
       const error = await firstValueFrom(facade.error$);
-      expect(error).toBe('Falha ao deletar');
+      expect(error).toBe('Erro interno do servidor.');
     });
   });
 
@@ -184,7 +184,7 @@ describe('TutorFacade', () => {
       const error = await firstValueFrom(facade.error$);
 
       expect(detail).toBeNull();
-      expect(error).toBe('Erro ao carregar');
+      expect(error).toBe('Erro interno do servidor.');
     });
   });
 
@@ -299,7 +299,7 @@ describe('TutorFacade', () => {
       const httpError = {
         response: {
           status: 404,
-          data: { message: 'Pet não encontrado' },
+          data: { message: 'Recurso não encontrado' },
         },
       };
 
@@ -308,7 +308,7 @@ describe('TutorFacade', () => {
       await expect(facade.unlinkPet(1, 2)).rejects.toEqual(httpError);
 
       const error = await firstValueFrom(facade.error$);
-      expect(error).toBe('Pet não encontrado');
+      expect(error).toBe('Recurso não encontrado.');
     });
   });
 
@@ -327,14 +327,14 @@ describe('TutorFacade', () => {
       vi.spyOn(mockTutorApi, 'uploadFoto').mockRejectedValue({
         response: {
           status: 500,
-          data: { message: 'Falha ao enviar foto' },
+          data: { message: 'Erro interno do servidor.' },
         },
       });
 
       await expect(facade.uploadFoto(1, file)).rejects.toBeDefined();
 
       const error = await firstValueFrom(facade.error$);
-      expect(error).toBe('Falha ao enviar foto');
+      expect(error).toBe('Erro interno do servidor.');
     });
   });
 
@@ -358,7 +358,7 @@ describe('TutorFacade', () => {
       await expect(facade.deleteFoto(1, 9)).rejects.toBeDefined();
 
       const error = await firstValueFrom(facade.error$);
-      expect(error).toBe('Falha ao excluir foto');
+      expect(error).toBe('Erro interno do servidor.');
     });
   });
 });

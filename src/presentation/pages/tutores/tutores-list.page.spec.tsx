@@ -145,9 +145,11 @@ describe("TutoresListPage - essencial", () => {
   });
 
   it("exibe mensagem de erro quando presente", () => {
-    hoisted.errorSubject.next("Falha ao carregar");
+    hoisted.errorSubject.next("Não foi possível carregar a lista de tutores.");
     renderPage();
-    expect(screen.getByText("Falha ao carregar")).toBeInTheDocument();
+    expect(
+      screen.getByText("Não foi possível carregar a lista de tutores."),
+    ).toBeInTheDocument();
   });
 
   it("exibe estado vazio quando sem tutores e sem erro", () => {

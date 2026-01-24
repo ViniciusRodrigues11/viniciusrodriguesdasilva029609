@@ -1,20 +1,19 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AuthApi } from './auth.api';
 import type { AuthEntity, CredentialsEntity } from '../../domain/entities/auth.entity';
-import axios from 'axios';
-
-/**
- * Mock do axios
- */
-vi.mock('axios');
+import type { AxiosInstance } from 'axios';
 
 describe('AuthApi', () => {
   let authApi: AuthApi;
-  const mockAxios = vi.mocked(axios);
+  let mockHttpClient: AxiosInstance;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    authApi = new AuthApi('https://api.test.com');
+    mockHttpClient = {
+      post: vi.fn(),
+      put: vi.fn(),
+    } as unknown as AxiosInstance;
+    authApi = new AuthApi(mockHttpClient);
   });
 
   describe('login', () => {
@@ -32,19 +31,17 @@ describe('AuthApi', () => {
         refresh_expires_in: 7200,
       };
 
-      mockAxios.create = vi.fn().mockReturnValue({
-        post: vi.fn().mockResolvedValue({ data: mockResponse }),
-        put: vi.fn(),
-        defaults: { headers: { common: {} } },
-      });
-
-      authApi = new AuthApi('https://api.test.com');
+      vi.mocked(mockHttpClient.post).mockResolvedValue({ data: mockResponse });
 
       // Act
       const result = await authApi.login(credentials);
 
       // Assert
       expect(result).toEqual(mockResponse);
+      expect(mockHttpClient.post).toHaveBeenCalledWith('/autenticacao/login', {
+        username: credentials.username,
+        password: credentials.password,
+      });
     });
 
     it('deve lançar erro ao receber resposta 401', async () => {
@@ -58,58 +55,40 @@ describe('AuthApi', () => {
         response: { status: 401, data: { message: 'Invalid credentials' } },
       };
 
-      mockAxios.create = vi.fn().mockReturnValue({
-        post: vi.fn().mockRejectedValue(mockError),
-        put: vi.fn(),
-        defaults: { headers: { common: {} } },
-      });
-
-      authApi = new AuthApi('https://api.test.com');
+      vi.mocked(mockHttpClient.post).mockRejectedValue(mockError);
 
       // Act & Assert
       await expect(authApi.login(credentials)).rejects.toThrow();
     });
   });
 
-  describe('setAccessToken', () => {
-    it('deve setar o token no header Authorization', () => {
+  describe('refreshToken', () => {
+    it('deve fazer requisição PUT para /autenticacao/refresh', async () => {
       // Arrange
-      const token = 'test-token-123';
-      mockAxios.create = vi.fn().mockReturnValue({
-        defaults: { headers: { common: {} } },
-        post: vi.fn(),
-        put: vi.fn(),
-      });
+      const refreshToken = 'refresh123';
+      const mockResponse: AuthEntity = {
+        access_token: 'new-token123',
+        refresh_token: 'new-refresh123',
+        expires_in: 3600,
+        refresh_expires_in: 7200,
+      };
 
-      authApi = new AuthApi('https://api.test.com');
+      vi.mocked(mockHttpClient.put).mockResolvedValue({ data: mockResponse });
 
       // Act
-      authApi.setAccessToken(token);
+      const result = await authApi.refreshToken(refreshToken);
 
       // Assert
-      expect(authApi.getClient().defaults.headers.common['Authorization']).toBe(
-        `Bearer ${token}`
+      expect(result).toEqual(mockResponse);
+      expect(mockHttpClient.put).toHaveBeenCalledWith(
+        '/autenticacao/refresh',
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${refreshToken}`,
+          },
+        }
       );
-    });
-  });
-
-  describe('clearAccessToken', () => {
-    it('deve remover o token do header Authorization', () => {
-      // Arrange
-      mockAxios.create = vi.fn().mockReturnValue({
-        defaults: { headers: { common: { Authorization: 'Bearer token' } } },
-        post: vi.fn(),
-        put: vi.fn(),
-      });
-
-      authApi = new AuthApi('https://api.test.com');
-      authApi.setAccessToken('token123');
-
-      // Act
-      authApi.clearAccessToken();
-
-      // Assert
-      expect(authApi.getClient().defaults.headers.common['Authorization']).toBeUndefined();
     });
   });
 });

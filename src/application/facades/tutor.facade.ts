@@ -3,6 +3,7 @@ import type { TutorEntity } from '../../domain/entities/tutor.entity';
 import type { ListTutoresUseCase } from '../use-cases/list-tutores.use-case';
 import type { DeleteTutorUseCase } from '../use-cases/delete-tutor.use-case';
 import type { TutorApi, CreateTutorApiPayload, UpdateTutorApiPayload } from '../../infrastructure/api/tutor.api';
+import { extractErrorMessage } from '../../helpers/error-handler.helper';
 
 export interface TutorPaginationState {
   page: number;
@@ -88,7 +89,7 @@ export class TutorFacade {
         });
       })
       .catch((error) => {
-        this.errorSubject.next(this.extractErrorMessage(error));
+        this.errorSubject.next(extractErrorMessage(error));
         this.tutoresSubject.next([]);
       })
       .finally(() => {
@@ -146,7 +147,7 @@ export class TutorFacade {
         });
       }
     } catch (error) {
-      this.errorSubject.next(this.extractErrorMessage(error));
+      this.errorSubject.next(extractErrorMessage(error));
       throw error;
     } finally {
       this.loadingSubject.next(false);
@@ -160,7 +161,7 @@ export class TutorFacade {
     try {
       await this.tutorApi.uploadFoto(tutorId, foto);
     } catch (error) {
-      this.errorSubject.next(this.extractErrorMessage(error));
+      this.errorSubject.next(extractErrorMessage(error));
       throw error;
     } finally {
       this.loadingSubject.next(false);
@@ -174,7 +175,7 @@ export class TutorFacade {
     try {
       await this.tutorApi.deleteFoto(tutorId, fotoId);
     } catch (error) {
-      this.errorSubject.next(this.extractErrorMessage(error));
+      this.errorSubject.next(extractErrorMessage(error));
       throw error;
     } finally {
       this.loadingSubject.next(false);
@@ -189,7 +190,7 @@ export class TutorFacade {
       const tutorDetail = await this.tutorApi.getTutorDetail(tutorId);
       this.tutorDetailSubject.next(tutorDetail);
     } catch (error) {
-      this.errorSubject.next(this.extractErrorMessage(error));
+      this.errorSubject.next(extractErrorMessage(error));
       this.tutorDetailSubject.next(null);
       throw error;
     } finally {
@@ -212,7 +213,7 @@ export class TutorFacade {
       await Promise.all(petIds.map((petId) => this.tutorApi.linkPet(tutorId, petId)));
       await this.loadTutorDetail(tutorId);
     } catch (error) {
-      this.errorSubject.next(this.extractErrorMessage(error));
+      this.errorSubject.next(extractErrorMessage(error));
       throw error;
     } finally {
       this.loadingSubject.next(false);
@@ -225,10 +226,9 @@ export class TutorFacade {
 
     try {
       await this.tutorApi.unlinkPet(tutorId, petId);
-      // Recarrega os detalhes do tutor para atualizar a lista de pets
       await this.loadTutorDetail(tutorId);
     } catch (error) {
-      this.errorSubject.next(this.extractErrorMessage(error));
+      this.errorSubject.next(extractErrorMessage(error));
       throw error;
     } finally {
       this.loadingSubject.next(false);
@@ -244,21 +244,5 @@ export class TutorFacade {
       pageSize: 9,
       total: null,
     });
-  }
-
-  private extractErrorMessage(error: unknown): string {
-    if (error && typeof error === 'object' && 'response' in error) {
-      const httpError = error as { response?: { data?: { message?: string }; status?: number } };
-      const status = httpError.response?.status;
-      if (status === 401) return 'Sessão expirada. Faça login novamente.';
-      return httpError.response?.data?.message ?? 'Erro ao processar solicitação.';
-    }
-
-    if (error instanceof Error) {
-      if (error.message === 'Network Error') return 'Erro de conexão com o servidor.';
-      return error.message || 'Erro ao processar solicitação.';
-    }
-
-    return 'Erro ao processar solicitação.';
   }
 }

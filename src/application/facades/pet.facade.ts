@@ -2,6 +2,7 @@ import { BehaviorSubject, type Observable } from 'rxjs';
 import type { PetEntity } from '../../domain/entities/pet.entity';
 import type { ListPetsUseCase } from '../use-cases/list-pets.use-case';
 import type { PetApi, CreatePetApiPayload, PetApiResponse, UpdatePetApiPayload, PetDetailApiResponse } from '../../infrastructure/api/pet.api';
+import { extractErrorMessage } from '../../helpers/error-handler.helper';
 
 export interface PetPaginationState {
   page: number;
@@ -90,7 +91,7 @@ export class PetFacade {
       })
       .catch((error: unknown) => {
         this.petsSubject.next([]);
-        this.errorSubject.next(this.extractErrorMessage(error));
+        this.errorSubject.next(extractErrorMessage(error));
       })
       .finally(() => {
         this.loadingSubject.next(false);
@@ -107,7 +108,7 @@ export class PetFacade {
 
       return petEntity;
     } catch (error: unknown) {
-      this.errorSubject.next(this.extractErrorMessage(error));
+      this.errorSubject.next(extractErrorMessage(error));
       throw error;
     } finally {
       this.loadingSubject.next(false);
@@ -136,7 +137,7 @@ export class PetFacade {
 
       return petEntity;
     } catch (error: unknown) {
-      this.errorSubject.next(this.extractErrorMessage(error));
+      this.errorSubject.next(extractErrorMessage(error));
       throw error;
     } finally {
       this.loadingSubject.next(false);
@@ -164,7 +165,7 @@ export class PetFacade {
         });
       }
     } catch (error: unknown) {
-      this.errorSubject.next(this.extractErrorMessage(error));
+      this.errorSubject.next(extractErrorMessage(error));
       throw error;
     } finally {
       this.loadingSubject.next(false);
@@ -178,7 +179,7 @@ export class PetFacade {
     try {
       await this.petApi.uploadFoto(petId, foto);
     } catch (error: unknown) {
-      this.errorSubject.next(this.extractErrorMessage(error));
+      this.errorSubject.next(extractErrorMessage(error));
       throw error;
     } finally {
       this.loadingSubject.next(false);
@@ -200,26 +201,11 @@ export class PetFacade {
       );
       this.petsSubject.next(updatedPets);
     } catch (error: unknown) {
-      this.errorSubject.next(this.extractErrorMessage(error));
+      this.errorSubject.next(extractErrorMessage(error));
       throw error;
     } finally {
       this.loadingSubject.next(false);
     }
-  }
-
-  private extractErrorMessage(error: unknown): string {
-    if (error && typeof error === 'object' && 'response' in error) {
-      const httpError = error as { response?: { status?: number; data?: { message?: string } } };
-      const status = httpError.response?.status;
-      if (status === 401) return 'Sessão expirada. Faça login novamente.';
-      if (status === 404) return 'Nenhum pet encontrado.';
-      return httpError.response?.data?.message ?? 'Erro ao carregar pets.';
-    }
-    if (error instanceof Error) {
-      if (error.message === 'Network Error') return 'Erro de conexão com o servidor.';
-      return error.message || 'Erro ao processar solicitação.';
-    }
-    return 'Erro ao processar solicitação.';
   }
 
   async loadPetDetail(petId: number): Promise<PetDetail> {
@@ -233,7 +219,7 @@ export class PetFacade {
       this.petDetailSubject.next(petEntity);
       return petEntity;
     } catch (error: unknown) {
-      this.errorSubject.next(this.extractErrorMessage(error));
+      this.errorSubject.next(extractErrorMessage(error));
       throw error;
     } finally {
       this.detailLoadingSubject.next(false);

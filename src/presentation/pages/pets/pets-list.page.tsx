@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { PetCard } from "../../components/pets/pet-card";
+import { PetCard } from "@/presentation/components/pets/pet-card";
 import {
   AddPetModal,
   PetUpsertModal,
