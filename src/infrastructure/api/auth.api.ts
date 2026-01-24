@@ -4,6 +4,14 @@ import type { AuthEntity, CredentialsEntity } from '../../domain/entities/auth.e
 export class AuthApi {
   constructor(private readonly httpClient: AxiosInstance) { }
 
+  setAccessToken(token: string): void {
+    this.httpClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  }
+
+  clearAccessToken(): void {
+    delete this.httpClient.defaults.headers.common['Authorization'];
+  }
+
   async login(credentials: CredentialsEntity): Promise<AuthEntity> {
     const response = await this.httpClient.post<AuthEntity>('/autenticacao/login', {
       username: credentials.username,
